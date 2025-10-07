@@ -1,17 +1,20 @@
 const express = require("express");
 const cors = require("cors");
 const { pool } = require("../Config/connection.js");
+const { lineaRouter } = require("../Routes/LineasRoutes.js");
 
 class Server {
   constructor() {
-    console.log("Clase iniciada");
     this.app = express();
     this.connection();
+    this.middlewares();
+    this.routes();
   }
 
   middlewares() {
     this.app.use(cors());
     this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
   }
 
   async connection() {
@@ -21,6 +24,10 @@ class Server {
     } catch (e) {
       console.log(e);
     }
+  }
+
+  routes() {
+    this.app.use("/api/linea", lineaRouter);
   }
 
   listen() {
