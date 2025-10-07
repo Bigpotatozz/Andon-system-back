@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { pool } = require("../Config/connection.js");
 const { lineaRouter } = require("../Routes/LineasRoutes.js");
+const { estatus_router } = require("../Routes/EstatusRoutes.js");
 
 class Server {
   constructor() {
@@ -28,6 +29,7 @@ class Server {
 
   routes() {
     this.app.use("/api/linea", lineaRouter);
+    this.app.use("/api/estatus", estatus_router);
   }
 
   listen() {
