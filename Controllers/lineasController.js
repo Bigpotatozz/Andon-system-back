@@ -18,6 +18,7 @@ const crearLinea = async (req, res) => {
 
     return res.status(200).send({
       message: "Linea creada correctamente",
+      idsLineas: idsLineas,
     });
   } catch (error) {
     console.log(error);
