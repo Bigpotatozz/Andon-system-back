@@ -54,4 +54,21 @@ const actualizarEstatus = async (req, res) => {
   }
 };
 
-module.exports = { crearEstatus, actualizarEstatus };
+const obtenerEstatus = async (req, res) => {
+  try {
+    const query = `SELECT *
+                    FROM lineaproduccion;;`;
+
+    const response = await pool.query(query);
+
+    return res.status(200).send({
+      response: response,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+module.exports = { crearEstatus, actualizarEstatus, obtenerEstatus };
