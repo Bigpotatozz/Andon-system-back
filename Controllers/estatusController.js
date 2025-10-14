@@ -22,7 +22,7 @@ const crearEstatus = async (req, res) => {
 
       for (const idEstatus of idsColores) {
         const [result] = await pool.query(queryDetalle, [idEstatus, idLinea]);
-        const query2 = `INSERT INTO tiempo(fecha, tiempo) VALUES (NOW(), '00:00:00')`;
+        const query2 = `INSERT INTO tiempo(fecha, inicio,final) VALUES (NOW(), '00:00:00', '00:00:00')`;
         const [result2] = await pool.query(query2);
         detalleProduccion.push(result.insertId);
         tiempos.push(result2.insertId);
@@ -53,17 +53,51 @@ const crearEstatus = async (req, res) => {
 
 const actualizarEstatus = async (req, res) => {
   try {
-    const { estatus, idLinea } = req.body;
+    const { color, idLineaProduccion } = req.body;
+    console.log(color, idLineaProduccion);
 
-    console.log(estatus);
+    const queryObtenerIdEstatus = `select * from detallelineaproduccion as dl
+                                    inner join estatus as e on dl.idEstatus = e.idEstatus
+                                    where idLineaProduccion = ?
+                                    AND color = ?;`;
 
-    const query = `UPDATE lineaproduccion SET estatusRealTime = ? where idLineaProduccion = ?`;
-    const [result] = await pool.query(query, [estatus, idLinea]);
+    const detalleestatus = await pool.query(queryObtenerIdEstatus, [
+      idLineaProduccion,
+      color,
+    ]);
+
+    console.log(detalleestatus[0][0]);
+
+    const oldLineaQuery = `select * from lineaproduccion 
+                            join detallelineaproduccion on detallelineaproduccion.idEstatus = lineaproduccion.estatusActual
+                            join estatus on estatus.idEstatus = detallelineaproduccion.idEstatus
+                            where lineaproduccion.idLineaProduccion = detallelineaproduccion.idLineaProduccion
+                            and lineaproduccion.idLineaProduccion = ?;`;
+    const lineaProduccionAntigua = await pool.query(oldLineaQuery, [
+      idLineaProduccion,
+    ]);
+
+    const cerrarTiempoQuery = `update tiempo set final = NOW() where idTiempo = ?;`;
+    const cerrarTiempo = await pool.query(cerrarTiempoQuery, [
+      lineaProduccionAntigua[0][0].idTiempo,
+    ]);
+
+    const queryActualizarEstatus = `update lineaProduccion set estatusActual = ? where idLineaProduccion = ?;`;
+    const resultado2 = await pool.query(queryActualizarEstatus, [
+      detalleestatus[0][0].idEstatus,
+      idLineaProduccion,
+    ]);
+
+    const queryActualizarTiempo = `update tiempo set inicio = NOW() where idTiempo = ?;`;
+    const resultado3 = await pool.query(queryActualizarTiempo, [
+      detalleestatus[0][0].idTiempo,
+    ]);
 
     return res.status(200).send({
-      message: "Estatus registrado",
+      message: detalleestatus[0],
     });
   } catch (e) {
+    console.log(e);
     return res.status(500).send({
       message: "Hubo un error",
     });
@@ -72,13 +106,15 @@ const actualizarEstatus = async (req, res) => {
 
 const obtenerEstatus = async (req, res) => {
   try {
-    const query = `SELECT *
-                    FROM lineaproduccion;;`;
+    const query = `select * from lineaproduccion 
+                    join detallelineaproduccion on detallelineaproduccion.idEstatus = lineaproduccion.estatusActual
+                    join estatus on estatus.idEstatus = detallelineaproduccion.idEstatus
+                    where lineaproduccion.idLineaProduccion = detallelineaproduccion.idLineaProduccion;`;
 
     const response = await pool.query(query);
 
     return res.status(200).send({
-      response: response,
+      response: response[0],
     });
   } catch (e) {
     console.log(e);
