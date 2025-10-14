@@ -66,21 +66,31 @@ const actualizarEstatus = async (req, res) => {
       color,
     ]);
 
-    console.log(detalleestatus[0][0]);
+    const lineaProduccionQuery = `select * from lineaproduccion where idLineaProduccion = ?;`;
+    const lineaProduccion = await pool.query(lineaProduccionQuery, [
+      idLineaProduccion,
+    ]);
 
-    const oldLineaQuery = `select * from lineaproduccion 
+    console.log(detalleestatus[0][0]);
+    console.log(lineaProduccion[0][0]);
+
+    if (lineaProduccion[0][0].estatusActual != 0) {
+      const oldLineaQuery = `select * from lineaproduccion 
                             join detallelineaproduccion on detallelineaproduccion.idEstatus = lineaproduccion.estatusActual
                             join estatus on estatus.idEstatus = detallelineaproduccion.idEstatus
                             where lineaproduccion.idLineaProduccion = detallelineaproduccion.idLineaProduccion
                             and lineaproduccion.idLineaProduccion = ?;`;
-    const lineaProduccionAntigua = await pool.query(oldLineaQuery, [
-      idLineaProduccion,
-    ]);
+      const lineaProduccionAntigua = await pool.query(oldLineaQuery, [
+        idLineaProduccion,
+      ]);
 
-    const cerrarTiempoQuery = `update tiempo set final = NOW() where idTiempo = ?;`;
-    const cerrarTiempo = await pool.query(cerrarTiempoQuery, [
-      lineaProduccionAntigua[0][0].idTiempo,
-    ]);
+      console.log(lineaProduccionAntigua);
+
+      const cerrarTiempoQuery = `update tiempo set final = NOW() where idTiempo = ?;`;
+      const cerrarTiempo = await pool.query(cerrarTiempoQuery, [
+        lineaProduccionAntigua[0][0].idTiempo,
+      ]);
+    }
 
     const queryActualizarEstatus = `update lineaProduccion set estatusActual = ? where idLineaProduccion = ?;`;
     const resultado2 = await pool.query(queryActualizarEstatus, [
