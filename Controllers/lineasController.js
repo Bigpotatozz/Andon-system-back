@@ -1,24 +1,22 @@
 const { pool } = require("../Config/connection");
 
 const crearLinea = async (req, res) => {
-  const { nombres } = req.body;
-  const idsLineas = [];
+  const { idsLineasProduccion } = req.body;
 
   try {
-    for (const e of nombres) {
+    console.log(idsLineasProduccion);
+    for (const e of idsLineasProduccion) {
       if (e == "" || e == null) {
         continue;
       }
 
-      const query = `insert into lineaproduccion (nombre) values ('${e}')`;
-      const [result] = await pool.query(query);
-
-      idsLineas.push(result.insertId);
+      const query = `insert into lineaproduccion (idLineaProduccion, estatusActual) values (?, 0);`;
+      const result = await pool.query(query, e);
     }
 
     return res.status(200).send({
       message: "Linea creada correctamente",
-      idsLineas: idsLineas,
+      idsLineas: idsLineasProduccion,
     });
   } catch (error) {
     console.log(error);
