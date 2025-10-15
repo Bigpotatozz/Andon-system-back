@@ -15,7 +15,11 @@ const crearEstatus = async (req, res) => {
     let detalleProduccion = [];
     for (const e of colores) {
       const query = `INSERT INTO estatus(nombre,prioridad,color,cancion) values ('prueba',?,?,?)`;
-      const [result] = await pool.query(query, [e.peso, e.color, e.cancion]);
+      const [result] = await connection.query(query, [
+        e.peso,
+        e.color,
+        e.cancion,
+      ]);
       idsColores.push(result.insertId);
     }
 
@@ -25,9 +29,12 @@ const crearEstatus = async (req, res) => {
       const queryDetalle = `INSERT INTO detallelineaproduccion (idEstatus, idLineaProduccion) VALUES (?,?)`;
 
       for (const idEstatus of idsColores) {
-        const [result] = await pool.query(queryDetalle, [idEstatus, idLinea]);
+        const [result] = await connection.query(queryDetalle, [
+          idEstatus,
+          idLinea,
+        ]);
         const query2 = `INSERT INTO tiempo(fecha, inicio,final) VALUES (NOW(), '00:00:00', '00:00:00')`;
-        const [result2] = await pool.query(query2);
+        const [result2] = await connection.query(query2);
         detalleProduccion.push(result.insertId);
         tiempos.push(result2.insertId);
       }
@@ -39,7 +46,7 @@ const crearEstatus = async (req, res) => {
       const idDetalle = detalleProduccion[i];
       const idTiempo = tiempos[i];
       const query = `UPDATE detallelineaproduccion SET idTiempo = ? WHERE idDetalle = ?`;
-      await pool.query(query, [idTiempo, idDetalle]);
+      await connection.query(query, [idTiempo, idDetalle]);
     }
 
     await connection.commit();
