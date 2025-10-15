@@ -1,17 +1,21 @@
 const { pool } = require("../Config/connection");
 
 const crearEstatus = async (req, res) => {
-  const { colores, idsLineasProduccion } = req.body;
+  const bodyData = JSON.parse(req.body.data);
+
+  const { colores, idsLineasProduccion } = bodyData;
+
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
+
     let idsColores = [];
     let idsProduccion = idsLineasProduccion;
     let tiempos = [];
     let detalleProduccion = [];
     for (const e of colores) {
-      const query = `INSERT INTO estatus(nombre,prioridad,color,cancion) values ('prueba',?,?,'../Config/connection.mp3')`;
-      const [result] = await pool.query(query, [e.peso, e.color]);
+      const query = `INSERT INTO estatus(nombre,prioridad,color,cancion) values ('prueba',?,?,?)`;
+      const [result] = await pool.query(query, [e.peso, e.color, e.cancion]);
       idsColores.push(result.insertId);
     }
 

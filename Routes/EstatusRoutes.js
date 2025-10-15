@@ -4,10 +4,11 @@ const {
   actualizarEstatus,
   obtenerEstatus,
 } = require("../Controllers/estatusController");
+const upload = require("../Helpers/fileUpload");
 
 const estatus_router = Router();
 
-estatus_router.post("/crearColor", crearEstatus);
+estatus_router.post("/crearColor", upload.any(), crearEstatus);
 estatus_router.post("/actualizarEstatus", actualizarEstatus);
 estatus_router.get("/obtenerEstatus", obtenerEstatus);
 
