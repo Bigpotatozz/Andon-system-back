@@ -4,23 +4,26 @@ const crearEstatus = async (req, res) => {
   const bodyData = JSON.parse(req.body.data);
 
   const { colores, idsLineasProduccion } = bodyData;
-
+  const canciones = req.files;
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
+    console.log(canciones);
 
     let idsColores = [];
     let idsProduccion = idsLineasProduccion;
     let tiempos = [];
     let detalleProduccion = [];
+    let contador = 0;
     for (const e of colores) {
       const query = `INSERT INTO estatus(nombre,prioridad,color,cancion) values ('prueba',?,?,?)`;
       const [result] = await connection.query(query, [
         e.peso,
         e.color,
-        e.cancion,
+        canciones[contador].filename,
       ]);
       idsColores.push(result.insertId);
+      contador++;
     }
 
     console.log(idsColores);
@@ -144,4 +147,32 @@ const obtenerEstatus = async (req, res) => {
     });
   }
 };
-module.exports = { crearEstatus, actualizarEstatus, obtenerEstatus };
+
+const obtenerEstatusEspecifico = async (req, res) => {
+  const { idEstatus } = req.params;
+  try {
+    const query = `select * from lineaproduccion 
+                    join detallelineaproduccion on detallelineaproduccion.idEstatus = lineaproduccion.estatusActual
+                    join estatus on estatus.idEstatus = detallelineaproduccion.idEstatus
+                    where lineaproduccion.idLineaProduccion = detallelineaproduccion.idLineaProduccion
+                    and lineaproduccion.idLineaProduccion = ?;`;
+
+    const response = await pool.query(query, [idEstatus]);
+
+    return res.status(200).send({
+      response: response[0],
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
+module.exports = {
+  crearEstatus,
+  actualizarEstatus,
+  obtenerEstatus,
+  obtenerEstatusEspecifico,
+};
