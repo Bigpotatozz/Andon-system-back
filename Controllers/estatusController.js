@@ -36,7 +36,7 @@ const crearEstatus = async (req, res) => {
           idEstatus,
           idLinea,
         ]);
-        const query2 = `INSERT INTO tiempo(fecha, inicio,final) VALUES (NOW(), '00:00:00', '00:00:00')`;
+        const query2 = `INSERT INTO tiempo(fecha, inicio,final) VALUES (NOW(), NULL, NULL)`;
         const [result2] = await connection.query(query2);
         detalleProduccion.push(result.insertId);
         tiempos.push(result2.insertId);
@@ -92,6 +92,7 @@ const actualizarEstatus = async (req, res) => {
       const oldLineaQuery = `select * from lineaproduccion 
                             join detallelineaproduccion on detallelineaproduccion.idEstatus = lineaproduccion.estatusActual
                             join estatus on estatus.idEstatus = detallelineaproduccion.idEstatus
+                            join tiempo on tiempo.idTiempo = detallelineaproduccion.idTiempo
                             where lineaproduccion.idLineaProduccion = detallelineaproduccion.idLineaProduccion
                             and lineaproduccion.idLineaProduccion = ?;`;
       const lineaProduccionAntigua = await pool.query(oldLineaQuery, [
@@ -100,7 +101,7 @@ const actualizarEstatus = async (req, res) => {
 
       console.log(lineaProduccionAntigua);
 
-      const cerrarTiempoQuery = `update tiempo set final = NOW() where idTiempo = ?;`;
+      const cerrarTiempoQuery = `update tiempo set final = NOW(), total = COALESCE(total, 0) + TIMESTAMPDIFF(SECOND, inicio, NOW()) where idTiempo = ?;`;
       const cerrarTiempo = await pool.query(cerrarTiempoQuery, [
         lineaProduccionAntigua[0][0].idTiempo,
       ]);
