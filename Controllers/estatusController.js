@@ -160,8 +160,18 @@ const obtenerEstatusEspecifico = async (req, res) => {
 
     const response = await pool.query(query, [idEstatus]);
 
+    const query2 = `SELECT * 
+                    FROM lineaproduccion 
+                    JOIN detallelineaproduccion ON lineaproduccion.idLineaProduccion = detallelineaproduccion.idLineaProduccion
+                    JOIN estatus ON estatus.idEstatus = detallelineaproduccion.idEstatus
+                    JOIN tiempo ON tiempo.idTiempo = detallelineaproduccion.idTiempo
+                    WHERE lineaproduccion.idLineaProduccion = ?;
+                    `;
+    const response2 = await pool.query(query2, [idEstatus]);
+
     return res.status(200).send({
       response: response[0],
+      response2: response2[0],
     });
   } catch (e) {
     console.log(e);
