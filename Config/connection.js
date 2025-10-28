@@ -1,7 +1,10 @@
 const mysql = require("mysql2/promise");
 const dotenv = require("dotenv");
+//Accede a DOTENV
 dotenv.config();
 
+//Crea un pool para la interaccion con base de datos
+//Usa las variables de entorno
 const pool = mysql.createPool({
   host: process.env.HOST,
   user: process.env.USER,
@@ -17,6 +20,7 @@ const pool = mysql.createPool({
   keepAliveInitialDelay: 0,
 });
 
+//Conecta el pool
 pool
   .getConnection()
   .then((connection) => {
