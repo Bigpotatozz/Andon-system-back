@@ -16,10 +16,11 @@ const crearEstatus = async (req, res) => {
     let detalleProduccion = [];
     let contador = 0;
     for (const e of colores) {
-      const query = `INSERT INTO estatus(nombre,prioridad,color,cancion) values ('prueba',?,?,?)`;
+      const query = `INSERT INTO estatus(nombre,prioridad,color,colorId, cancion) values ('prueba',?,?,?,?)`;
       const [result] = await connection.query(query, [
         e.peso,
         e.color,
+        e.colorId,
         canciones[contador].filename,
       ]);
       idsColores.push(result.insertId);
@@ -67,17 +68,17 @@ const crearEstatus = async (req, res) => {
 
 const actualizarEstatus = async (req, res) => {
   try {
-    const { color, idLineaProduccion } = req.body;
-    console.log(color, idLineaProduccion);
+    const { colorId, idLineaProduccion } = req.body;
+    console.log(colorId, idLineaProduccion);
 
     const queryObtenerIdEstatus = `select * from detallelineaproduccion as dl
                                     inner join estatus as e on dl.idEstatus = e.idEstatus
                                     where idLineaProduccion = ?
-                                    AND color = ?;`;
+                                    AND colorId = ?;`;
 
     const detalleestatus = await pool.query(queryObtenerIdEstatus, [
       idLineaProduccion,
-      color,
+      colorId,
     ]);
 
     const lineaProduccionQuery = `select * from lineaproduccion where idLineaProduccion = ?;`;
