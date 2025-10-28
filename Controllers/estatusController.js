@@ -68,17 +68,17 @@ const crearEstatus = async (req, res) => {
 
 const actualizarEstatus = async (req, res) => {
   try {
-    const { colorId, idLineaProduccion } = req.body;
-    console.log(colorId, idLineaProduccion);
+    const { color, idLineaProduccion } = req.body;
+    console.log(color, idLineaProduccion);
 
     const queryObtenerIdEstatus = `select * from detallelineaproduccion as dl
                                     inner join estatus as e on dl.idEstatus = e.idEstatus
                                     where idLineaProduccion = ?
-                                    AND colorId = ?;`;
+                                    AND color = ?;`;
 
     const detalleestatus = await pool.query(queryObtenerIdEstatus, [
       idLineaProduccion,
-      colorId,
+      color,
     ]);
 
     const lineaProduccionQuery = `select * from lineaproduccion where idLineaProduccion = ?;`;

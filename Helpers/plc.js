@@ -1,29 +1,40 @@
 const net = require("net");
-
-const ObtenerDatosPLC = () => {
+const main = async () => {
   const client = new net.Socket();
-  const comandoVariable = "RD DM150"; //Guarda el comando seguido de la variable que se leera
-  const comando = comandoVariable + "\r\n"; //Le da formato
+  const obtenerDatosPLC = async (comando, client, puerto, ip) => {
+    const parsearComando = comando + "\r\n";
 
-  client.connect(8501, "192.168.0.10", () => {
-    //Es un metodo que lo que hace es conectarse con el plc en el puerto 8500 y con su ip
-    console.log("Conectado al PLC via TCP"); //Imprime que se conecto al PLC
-    client.write(comando); // comando ejemplo para PLC Keyence
-  });
+    return await new Promise((resolve, reject) => {
+      client.connect(puerto, ip, () => {
+        console.log("Conexion con PLC exitosa");
 
-  client.on("data", (data) => {
-    //
-    console.log("Respuesta del PLC:", data.toString());
-    client.destroy(); // cerrar conexión
-  });
+        client.write(parsearComando);
 
-  client.on("error", (err) => {
-    console.error("Error en conexión TCP:", err);
-  });
+        client.on("data", (data) => {
+          client.destroy();
+          resolve(data.toString());
+        });
+      });
+
+      client.on("error", (err) => {
+        console.log(err);
+        reject(err);
+      });
+    });
+  };
+
+  try {
+    const statusCode = 0;
+
+    setInterval(async () => {
+      code = await obtenerDatosPLC("RD DM150", client, 8501, "192.168.0.10");
+
+      const codigoEstatus = parseInt(code);
+      console.log(codigoEstatus);
+    }, 2000);
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-while (true) {
-  ObtenerDatosPLC();
-}
-
-export default ObtenerDatosPLC;
+main();
