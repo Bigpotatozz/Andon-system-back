@@ -205,6 +205,12 @@ const obtenerEstatusEspecifico = async (req, res) => {
 
     const response = await pool.query(query, [idEstatus]);
 
+    if (response[0].length == 0) {
+      return res.status(404).send({
+        message: "Linea de produccion no existente",
+      });
+    }
+
     //Obtiene el detalle de la linea junto con sus tablas
     const query2 = `SELECT * 
                     FROM lineaproduccion 

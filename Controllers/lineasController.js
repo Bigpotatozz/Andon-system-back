@@ -33,4 +33,29 @@ const crearLinea = async (req, res) => {
   }
 };
 
-module.exports = { crearLinea };
+const verificarExistenciaLinea = async (req, res) => {
+  const { idLinea } = req.params;
+  try {
+    const query = `select * from lineaproduccion where idLineaProduccion = ?;`;
+
+    const response = await pool.query(query, [idLinea]);
+
+    if (response[0].length == 0) {
+      return res.status(404).send({
+        message: "Linea de produccion no existente",
+      });
+    }
+
+    return res.status(200).send({
+      linea: true,
+      message: "Linea existente",
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
+module.exports = { crearLinea, verificarExistenciaLinea };
