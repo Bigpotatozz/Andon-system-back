@@ -7,10 +7,12 @@ const crearEstatus = async (req, res) => {
   const { colores, idsLineasProduccion } = bodyData;
   //Accede a los archivos de la peticion
   const canciones = req.files;
+
   //Inicializa una transaccion
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
+    console.log(colores);
     console.log(canciones);
 
     //Inicializa las variables a utilizar
@@ -19,14 +21,25 @@ const crearEstatus = async (req, res) => {
     let tiempos = [];
     let detalleProduccion = [];
     let contador = 0;
+    let contadorCancion = 0;
     for (const e of colores) {
+      let cancion = "";
+
+      if (e.cancion == "") {
+        cancion = null;
+        console.log("no cancion");
+      } else {
+        cancion = canciones[contadorCancion].filename;
+        contadorCancion++;
+      }
+
       //Inserta los estatus
       const query = `INSERT INTO estatus(nombre,prioridad,color,colorId, cancion) values ('prueba',?,?,?,?)`;
       const [result] = await connection.query(query, [
         e.peso,
         e.color,
         e.colorId,
-        canciones[contador].filename,
+        cancion,
       ]);
       idsColores.push(result.insertId);
       contador++;
