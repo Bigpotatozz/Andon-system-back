@@ -42,6 +42,7 @@ const verificarExistenciaLinea = async (req, res) => {
 
     if (response[0].length == 0) {
       return res.status(404).send({
+        linea: false,
         message: "Linea de produccion no existente",
       });
     }
@@ -53,9 +54,30 @@ const verificarExistenciaLinea = async (req, res) => {
   } catch (e) {
     console.log(e);
     return res.status(500).send({
+      linea: false,
       message: "Hubo un error",
     });
   }
 };
 
-module.exports = { crearLinea, verificarExistenciaLinea };
+const obtenerLineasRegistradas = async (req, res) => {
+  try {
+    const query = `Select idLineaProduccion from lineaproduccion;`;
+    const response = await pool.query(query);
+
+    return res.status(200).send({
+      lineas: response[0],
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
+module.exports = {
+  crearLinea,
+  verificarExistenciaLinea,
+  obtenerLineasRegistradas,
+};
