@@ -3,10 +3,13 @@ const { pool } = require("../Config/connection");
 //Crea una nueva linea de produccion
 const crearLinea = async (req, res) => {
   //accede la informacion del body
-  const { idsLineasProduccion } = req.body;
+  const { idsLineasProduccion, turnos } = req.body;
+
+  const connection = await pool.getConnection();
 
   try {
-    console.log(idsLineasProduccion);
+    await connection.beginTransaction();
+    console.log(idsLineasProduccion, turnos);
     //Crea las lineas de produccion
     for (const e of idsLineasProduccion) {
       if (e == "" || e == null) {
@@ -14,9 +17,20 @@ const crearLinea = async (req, res) => {
       }
 
       const query = `insert into lineaproduccion (idLineaProduccion, estatusActual) values (?, 0);`;
-      const result = await pool.query(query, e);
+      const result = await connection.query(query, e);
+
+      for (const t of turnos) {
+        const queryTurnos = `INSERT INTO turno(nombreTurno, horaInicio, horaFin, idLineaProduccion) values (?,?,?,?)`;
+        const turnosQuery = await connection.query(queryTurnos, [
+          t.nombreTurno,
+          t.horaInicio,
+          t.horaFin,
+          e,
+        ]);
+      }
     }
 
+    await connection.commit();
     //Devuelve una respuesta exitosa
     return res.status(200).send({
       message: "Linea creada correctamente",
@@ -25,10 +39,10 @@ const crearLinea = async (req, res) => {
   } catch (error) {
     console.log(error);
 
+    await connection.rollback();
     //Devuelve un error como respuesta
     return res.status(500).send({
       message: "Error al crear la linea",
-      idsLineas: idsLineas,
     });
   }
 };
@@ -76,8 +90,41 @@ const obtenerLineasRegistradas = async (req, res) => {
   }
 };
 
+const actualizarProductionRatio = async (req, res) => {
+  const { lunch, descanso, paro, kyt } = req.body;
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const queryLunch = `UPDATE estatus set tiempoDefinido = ? where colorId = 1011;`;
+    const responseLunch = await pool.query(queryLunch, [lunch]);
+
+    const queryDescanso = `UPDATE estatus set tiempoDefinido = ? where colorId = 1012;`;
+    const responseDescanso = await pool.query(queryDescanso, [descanso]);
+
+    const queryParo = `UPDATE estatus set tiempoDefinido = ? where colorId = 1013;`;
+    const responseParo = await pool.query(queryParo, [paro]);
+
+    const queryKYT = `UPDATE estatus set tiempoDefinido = ? where colorId = 1014;`;
+    const responseKYT = await pool.query(queryKYT, [kyt]);
+
+    return res.send({
+      message: "Actualizado correctamente",
+    });
+
+    await connection.commit();
+  } catch (e) {
+    console.log(e);
+
+    await connection.rollback();
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
 module.exports = {
   crearLinea,
   verificarExistenciaLinea,
   obtenerLineasRegistradas,
+  actualizarProductionRatio,
 };
