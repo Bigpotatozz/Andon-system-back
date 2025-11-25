@@ -235,9 +235,29 @@ const obtenerEstatusEspecifico = async (req, res) => {
   }
 };
 
+const obtenerEstatusProductionRatio = async (req, res) => {
+  try {
+    const queryObtener = `SELECT * FROM estatus`;
+    const response = await pool.query(queryObtener);
+
+    const estatus = [];
+    response[0].forEach((e) => {
+      if (e.colorId >= 1011 && e.colorId <= 1014) estatus.push(e);
+    });
+
+    return res.status(200).send({
+      response: estatus,
+    });
+  } catch (e) {
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
 module.exports = {
   crearEstatus,
   actualizarEstatus,
   obtenerEstatus,
   obtenerEstatusEspecifico,
+  obtenerEstatusProductionRatio,
 };

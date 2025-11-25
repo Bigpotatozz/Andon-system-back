@@ -4,6 +4,7 @@ const {
   actualizarEstatus,
   obtenerEstatus,
   obtenerEstatusEspecifico,
+  obtenerEstatusProductionRatio,
 } = require("../Controllers/estatusController");
 const upload = require("../Helpers/fileUpload");
 
@@ -19,6 +20,11 @@ estatus_router.get("/obtenerEstatus", obtenerEstatus);
 estatus_router.get(
   "/obtenerEstatusEspecifico/:idEstatus",
   obtenerEstatusEspecifico
+);
+
+estatus_router.get(
+  "/obtenerEstatusProductionRatio",
+  obtenerEstatusProductionRatio
 );
 
 module.exports = { estatus_router };
