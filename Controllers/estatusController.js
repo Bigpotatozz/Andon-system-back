@@ -271,10 +271,32 @@ const obtenerEstatusProductionRatio = async (req, res) => {
     });
   }
 };
+
+const activarEstatus = async (req, res) => {
+  const { colorId } = req.body;
+  try {
+    const desactivarEstatusQuery = `UPDATE estatus set activo = false where colorId != ?`;
+    const desactivarEstatus = await pool.query(desactivarEstatusQuery, [
+      colorId,
+    ]);
+    const activarEstatusQuery = `UPDATE estatus set activo = true where colorId = ?`;
+    const activarEstatus = await pool.query(activarEstatusQuery, [colorId]);
+
+    return res.status(200).send({
+      message: "Estatus activado",
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
 module.exports = {
   crearEstatus,
   actualizarEstatus,
   obtenerEstatus,
   obtenerEstatusEspecifico,
   obtenerEstatusProductionRatio,
+  activarEstatus,
 };
