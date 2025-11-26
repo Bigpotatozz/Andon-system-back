@@ -3,38 +3,64 @@ const { pool } = require("../Config/connection");
 //Crea una nueva linea de produccion
 const crearLinea = async (req, res) => {
   //accede la informacion del body
-  const { idsLineasProduccion, turnos } = req.body;
+  const { estaciones, turnos } = req.body;
 
   const connection = await pool.getConnection();
 
   try {
     await connection.beginTransaction();
-    console.log(idsLineasProduccion, turnos);
-    //Crea las lineas de produccion
-    for (const e of idsLineasProduccion) {
-      if (e == "" || e == null) {
-        continue;
-      }
+    console.log(estaciones, turnos);
 
-      const query = `insert into lineaproduccion (idLineaProduccion, estatusActual) values (?, 0);`;
-      const result = await connection.query(query, e);
+    const idsEstaciones = [];
 
-      for (const t of turnos) {
-        const queryTurnos = `INSERT INTO turno(nombreTurno, horaInicio, horaFin, idLineaProduccion) values (?,?,?,?)`;
-        const turnosQuery = await connection.query(queryTurnos, [
-          t.nombreTurno,
-          t.horaInicio,
-          t.horaFin,
-          e,
-        ]);
-      }
+    //INSERCION DE LA LINEA DE PRODUCCION (POR LO PRONTO TIENE UN DEFAULT)
+    const insertarLineaProduccionQuery =
+      "INSERT INTO lineaproduccion(nombre) values (?)";
+    const insertarLineaProduccion = await connection.query(
+      insertarLineaProduccionQuery,
+      ["Linea de produccion"]
+    );
+
+    //OBTIENE EL ID DE LA LINEA DE PRODUCCION QUE SE ACABA DE INSERTAR
+    const idLineaProduccion = insertarLineaProduccion[0].insertId;
+
+    //RECORRE EL ARREGLO DE TURNOS
+    for (const turno of turnos) {
+      //INSERTA CADA UNO DE LOS TURNOS
+      const insertarTurnosQuery =
+        "INSERT INTO turno(nombreTurno, horaInicio, horaFin, objetivoProduccion, progresoProduccion, idLineaProduccion) values (?,?,?,?,?,?)";
+
+      const insertarTurnos = await connection.query(insertarTurnosQuery, [
+        turno.nombre,
+        turno.horaInicio,
+        turno.horaFin,
+        turno.objetivoProduccion,
+        turno.progresoProduccion,
+        idLineaProduccion,
+      ]);
     }
 
+    //RECORRE LAS ESTACIONES
+    for (const estacion of estaciones) {
+      //SI UNA ESTACION ES "" O NULL LA SALTA
+      if (estacion == "" || estacion == null) {
+        continue;
+      }
+      //INSERTA LAS ESTACIONES
+      const insertarEstacionesQuery =
+        "INSERT INTO estacion(nombre, estatusActual, idLineaProduccion) values(?,?,?)";
+      const insertarEstaciones = await connection.query(
+        insertarEstacionesQuery,
+        [estacion, 0, idLineaProduccion]
+      );
+
+      idsEstaciones.push(insertarEstaciones[0].insertId);
+    }
     await connection.commit();
     //Devuelve una respuesta exitosa
     return res.status(200).send({
       message: "Linea creada correctamente",
-      idsLineas: idsLineasProduccion,
+      idsEstaciones: idsEstaciones,
     });
   } catch (error) {
     console.log(error);

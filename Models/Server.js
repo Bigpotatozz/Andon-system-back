@@ -3,6 +3,7 @@ const cors = require("cors");
 const { pool } = require("../Config/connection.js");
 const { lineaRouter } = require("../Routes/LineasRoutes.js");
 const { estatus_router } = require("../Routes/EstatusRoutes.js");
+const { historicoRouter } = require("../Routes/HistoricoRoutes.js");
 
 //Inicializacion de la aplicacion
 class Server {
@@ -36,6 +37,7 @@ class Server {
   routes() {
     this.app.use("/api/linea", lineaRouter);
     this.app.use("/api/estatus", estatus_router);
+    this.app.use("/api/historico/", historicoRouter);
   }
 
   //Funcion de escucha
