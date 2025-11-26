@@ -292,6 +292,27 @@ const activarEstatus = async (req, res) => {
     });
   }
 };
+
+const obtenerEstatusRatio = async (req, res) => {
+  try {
+    const estatusRatioQuery = "select * from estatus where activo = true";
+    if (!estatusRatioQuery) {
+      return res.status(404).send({
+        message: "No hay estatus activos",
+      });
+    }
+
+    const estatusRatio = await pool.query(estatusRatioQuery);
+    return res.status(200).send({
+      response: estatusRatio[0],
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
 module.exports = {
   crearEstatus,
   actualizarEstatus,
@@ -299,4 +320,5 @@ module.exports = {
   obtenerEstatusEspecifico,
   obtenerEstatusProductionRatio,
   activarEstatus,
+  obtenerEstatusRatio,
 };
