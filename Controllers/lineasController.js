@@ -4,15 +4,16 @@ const { pool } = require("../Config/connection");
 const crearLinea = async (req, res) => {
   //accede la informacion del body
   const { estaciones, turnos } = req.body;
-
+  //Instancia la transaccion
   const connection = await pool.getConnection();
 
   try {
+    //Inicializa la transaccion
     await connection.beginTransaction();
+    //Log de depuracion
     console.log(estaciones, turnos);
-
+    //Inicializa un arreglo donde se guardaran los idsEstaciones
     const idsEstaciones = [];
-
     //INSERCION DE LA LINEA DE PRODUCCION (POR LO PRONTO TIENE UN DEFAULT)
     const insertarLineaProduccionQuery =
       "INSERT INTO lineaproduccion(nombre) values (?)";
@@ -34,8 +35,8 @@ const crearLinea = async (req, res) => {
         turno.nombre,
         turno.horaInicio,
         turno.horaFin,
-        turno.objetivoProduccion,
-        turno.progresoProduccion,
+        0,
+        0,
         idLineaProduccion,
       ]);
     }
@@ -54,6 +55,7 @@ const crearLinea = async (req, res) => {
         [estacion, 0, idLineaProduccion]
       );
 
+      //se pushea al arreglo los ids previamente insertados, para retornarlos al frontend
       idsEstaciones.push(insertarEstaciones[0].insertId);
     }
     await connection.commit();
@@ -65,6 +67,7 @@ const crearLinea = async (req, res) => {
   } catch (error) {
     console.log(error);
 
+    //Le hace rollback a la transaccion
     await connection.rollback();
     //Devuelve un error como respuesta
     return res.status(500).send({
@@ -74,12 +77,14 @@ const crearLinea = async (req, res) => {
 };
 
 const verificarExistenciaLinea = async (req, res) => {
+  //Accede a los params
   const { idLinea } = req.params;
   try {
-    const query = `select * from lineaproduccion where idLineaProduccion = ?;`;
-
+    //Realiza una consulta en base de datos donde verifica si hay alguna linea con ese id
+    const query = `select * from estacion where idEstacion = ?;`;
     const response = await pool.query(query, [idLinea]);
 
+    //Si no hay ninguna devuelve un estatus 404
     if (response[0].length == 0) {
       return res.status(404).send({
         linea: false,
@@ -87,11 +92,13 @@ const verificarExistenciaLinea = async (req, res) => {
       });
     }
 
+    //Si encuentra alguna devuelve un estatus 200
     return res.status(200).send({
       linea: true,
       message: "Linea existente",
     });
   } catch (e) {
+    //En caso de error se envia
     console.log(e);
     return res.status(500).send({
       linea: false,
@@ -100,11 +107,14 @@ const verificarExistenciaLinea = async (req, res) => {
   }
 };
 
+//Obtiene todas las estaciones registradas
 const obtenerLineasRegistradas = async (req, res) => {
   try {
-    const query = `Select idLineaProduccion from lineaproduccion;`;
+    //Consulta para obtener las estaciones
+    const query = `Select idEstacion from estacion;`;
     const response = await pool.query(query);
 
+    //Devuelve las estaciones
     return res.status(200).send({
       lineas: response[0],
     });
@@ -133,11 +143,10 @@ const actualizarProductionRatio = async (req, res) => {
     const queryKYT = `UPDATE estatus set tiempoDefinido = ? where colorId = 1014;`;
     const responseKYT = await pool.query(queryKYT, [kyt]);
 
+    await connection.commit();
     return res.send({
       message: "Actualizado correctamente",
     });
-
-    await connection.commit();
   } catch (e) {
     console.log(e);
 
