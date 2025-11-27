@@ -12,12 +12,12 @@ const reset = async (req, res) => {
     const querResetTiempo = await pool.query(resetTiempo);
 
     //RESETEA COMO 0 EL ESTATUS ACTUAL DE LA LINEA DE PRODUCCION
-    const resetEstatusActual = `UPDATE lineaproduccion set estatusActual = 0`;
+    const resetEstatusActual = `UPDATE estacion set estatusActual = 0`;
     const querResetEstatusActual = await pool.query(resetEstatusActual);
 
     //INSERCION EN TABLA DE TURNOS HISTORICO
     const insertTurnosHistorico = `insert into turnoHistorico (nombreTurno, horaInicio, horaFin, objetivoProduccion, progresoProduccion, idTurno)
-    select turno nombreTurno, horaInicio, horaFin, objetivoProduccion, progresoProduccion, idTurno from turno`;
+    select nombreTurno, horaInicio, horaFin, objetivoProduccion, progresoProduccion, idTurno from turno`;
     const querInsertTurnosHistorico = await pool.query(insertTurnosHistorico);
 
     const resetTurno = `UPDATE turno set objetivoProduccion = 0, progresoProduccion = 0`;
