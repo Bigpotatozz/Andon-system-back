@@ -30,4 +30,6 @@ estatus_router.get(
 estatus_router.post("/activarEstatus", activarEstatus);
 estatus_router.get("/obtenerEstatusRatio", obtenerEstatusRatio);
 
+//estatus_router.get("/obtenerEstatusSocket");
+
 module.exports = { estatus_router };

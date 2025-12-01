@@ -1,3 +1,4 @@
+const { response } = require("express");
 const { pool } = require("../Config/connection");
 
 //Registro de nuevos estatus
@@ -170,6 +171,9 @@ const actualizarEstatus = async (req, res) => {
       detalleestatus[0][0].idTiempo,
     ]);
 
+    const io = req.app.get("io"); // Obtener instancia de io
+    socketObtenerEstatus(io);
+
     //Devuelve una respuesta exitosa
     return res.status(200).send({
       message: detalleestatus[0],
@@ -313,6 +317,22 @@ const obtenerEstatusRatio = async (req, res) => {
     });
   }
 };
+
+const socketObtenerEstatus = async (socket) => {
+  const query = `select * from estacion 
+                    join detalleEstacion on detalleEstacion.idEstatus = estacion.estatusActual
+                    join estatus on estatus.idEstatus = detalleEstacion.idEstatus
+                    join tiempo on tiempo.idTiempo = detalleEstacion.idTiempo
+                    where estacion.idEstacion = detalleEstacion.idEstacion;`;
+
+  const response = await pool.query(query);
+
+  console.log("////////////////////////////////////////////////////");
+  console.log(response[0]);
+  console.log("////////////////////////////////////////////////////");
+  socket.emit("obtenerEstatus", response[0]);
+};
+
 module.exports = {
   crearEstatus,
   actualizarEstatus,
@@ -321,4 +341,5 @@ module.exports = {
   obtenerEstatusProductionRatio,
   activarEstatus,
   obtenerEstatusRatio,
+  socketObtenerEstatus,
 };

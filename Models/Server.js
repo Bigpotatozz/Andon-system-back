@@ -1,12 +1,14 @@
 const express = require("express");
 const cors = require("cors");
+const { Server } = require("socket.io");
 const { pool } = require("../Config/connection.js");
 const { lineaRouter } = require("../Routes/LineasRoutes.js");
 const { estatus_router } = require("../Routes/EstatusRoutes.js");
 const { historicoRouter } = require("../Routes/HistoricoRoutes.js");
+const { socketRoutes } = require("../Routes/SocketRoutes.js");
 
 //Inicializacion de la aplicacion
-class Server {
+class ServerNode {
   //Inicializacion de los metodos
   constructor() {
     this.app = express();
@@ -40,12 +42,24 @@ class Server {
     this.app.use("/api/historico/", historicoRouter);
   }
 
+  socketEvents() {
+    this.io.on("connection");
+  }
+
   //Funcion de escucha
   listen() {
-    this.app.listen(3000, () => {
+    this.httpServer = this.app.listen(3000, () => {
       console.log("Servidor corriendo en el puerto 3000");
     });
+
+    this.io = new Server(this.httpServer, {
+      cors: "*",
+    });
+
+    this.app.set("io", this.io);
+
+    socketRoutes(this.io);
   }
 }
 
-module.exports = { Server };
+module.exports = { ServerNode };
