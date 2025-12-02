@@ -111,7 +111,7 @@ const verificarExistenciaLinea = async (req, res) => {
 const obtenerLineasRegistradas = async (req, res) => {
   try {
     //Consulta para obtener las estaciones
-    const query = `Select idEstacion from estacion;`;
+    const query = `Select idEstacion, nombre from estacion;`;
     const response = await pool.query(query);
 
     //Devuelve las estaciones
@@ -157,9 +157,42 @@ const actualizarProductionRatio = async (req, res) => {
   }
 };
 
+const obtenerEstacionesTiempos = async (req, res) => {
+  const { idEstacion } = req.params;
+
+  try {
+    const queryEstacionesTiempo = `select * from estacion 
+                            join detalleEstacion on detalleEstacion.idEstatus = estacion.estatusActual
+                            join estatus on estatus.idEstatus = detalleEstacion.idEstatus
+                            join tiempo on tiempo.idTiempo = detalleEstacion.idTiempo
+                            where estacion.idEstacion = detalleEstacion.idEstacion                            
+                            and estacion.idEstacion = ?;`;
+
+    const estacionesTiempo = await pool.query(queryEstacionesTiempo, [
+      idEstacion,
+    ]);
+
+    if (!estacionesTiempo) {
+      return res.status(404).send({
+        message: "Estacion no inicializada",
+      });
+    }
+
+    return res.status(200).send({
+      response: estacionesTiempo[0],
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
 module.exports = {
   crearLinea,
   verificarExistenciaLinea,
   obtenerLineasRegistradas,
   actualizarProductionRatio,
+  obtenerEstacionesTiempos,
 };

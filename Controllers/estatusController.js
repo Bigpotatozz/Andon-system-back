@@ -152,8 +152,9 @@ const actualizarEstatus = async (req, res) => {
       console.log(lineaProduccionAntigua);
 
       //Actualiza el tiempo al tiempo en caso de que hubiera otro anteriormente
-      const cerrarTiempoQuery = `update tiempo set final = NOW(), total = COALESCE(total, 0) + TIMESTAMPDIFF(SECOND, inicio, NOW()) where idTiempo = ?;`;
+      const cerrarTiempoQuery = `update tiempo set final = NOW(), total = COALESCE(total, 0) + TIMESTAMPDIFF(SECOND, inicio, NOW()), contador = ? where idTiempo = ?;`;
       const cerrarTiempo = await pool.query(cerrarTiempoQuery, [
+        lineaProduccionAntigua[0][0].contador + 1,
         lineaProduccionAntigua[0][0].idTiempo,
       ]);
     }
