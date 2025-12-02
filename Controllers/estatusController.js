@@ -320,11 +320,12 @@ const obtenerEstatusRatio = async (req, res) => {
 };
 
 const socketObtenerEstatus = async (socket) => {
-  const query = `select * from estacion 
-                    join detalleEstacion on detalleEstacion.idEstatus = estacion.estatusActual
-                    join estatus on estatus.idEstatus = detalleEstacion.idEstatus
-                    join tiempo on tiempo.idTiempo = detalleEstacion.idTiempo
-                    where estacion.idEstacion = detalleEstacion.idEstacion;`;
+  const query = `select estacion.nombre AS nombreEstacion, estacion.idEstacion, estacion.estatusActual, detalleEstacion.*, estatus.*, tiempo.* 
+from estacion 
+join detalleEstacion on detalleEstacion.idEstatus = estacion.estatusActual
+join estatus on estatus.idEstatus = detalleEstacion.idEstatus
+join tiempo on tiempo.idTiempo = detalleEstacion.idTiempo
+where estacion.idEstacion = detalleEstacion.idEstacion;`;
 
   const response = await pool.query(query);
 
