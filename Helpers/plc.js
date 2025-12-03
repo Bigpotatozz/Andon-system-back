@@ -1,76 +1,102 @@
 const net = require("net");
-const { pool } = require("../Config/connection");
-//Funcion para obtener la informacion del PLC(KEYENCE)
-//Se declara como funcion asincrona
-const main = async () => {
-  //Crea un nuevo socket
 
-  //Creacion de funcion para obtener los datos
-  const obtenerDatosPLC = async (comando, puerto, ip) => {
-    const client = new net.Socket();
-    //Le da formato al comando
-    const parsearComando = comando + "\r\n";
-    //Crea una nueva promesa
-    return await new Promise((resolve, reject) => {
-      //Se conecta al plc indicando el puerto y la ip
-      client.connect(puerto, ip, () => {
-        //Si se conecta lo indica y accede a la variable indicada
-        console.log("Conexion con PLC exitosa");
-        //Escribe el comando
-        client.write(parsearComando);
-        //Accede a la variable indicada
-        client.on("data", (data) => {
-          //Destruye la conexion
-          client.destroy();
-          //Retorna la variable que se queria obtener del PLC
-          resolve(data.toString());
-        });
-      });
+//Se crea una clase Client
+class Client {
+  //Se crea su constructor
+  constructor(ip, puerto, comandos) {
+    //IP
+    this.ip = ip;
+    //Puerto
+    this.puerto = puerto;
+    //Comando parseado para el PLC
+    this.comandoParseado1 = comandos[0] + "\r\n";
+    this.comandoParseado2 = comandos[1] + "\r\n";
+    //Nuevo socket
+    this.client = new net.Socket();
+    //Estatus
+    this.isConnected = false;
+    this.estatusActual = 0;
+    this.idEstacion = 0;
+  }
 
-      //EN caso de error lo devuelve como err
-      client.on("error", (err) => {
-        console.log(err);
-        reject(err);
-      });
+  //Funcion que se encarga de conectar al PLC
+  connect() {
+    //Se conecta al PLC
+    this.client.connect(this.puerto, this.ip);
+
+    //Cuando escucha el evento connect
+    this.client.on("connect", () => {
+      //El estatus lo pone en true
+      this.isConnected = true;
+      //Imprime
+      console.log("Conectado al PLC");
+      //Se ejecuta la funcion de polling
+      this.polling();
     });
-  };
 
-  try {
-    let codeMemory = 0;
-    //Se crea un intervalo para poder sacar cada 2 segundos la informacion del PLC
-    setInterval(async () => {
-      //Se ejecuta la funcion de obtencion de datos del PLC
-      code = await obtenerDatosPLC("RD DM150", 8501, "192.168.0.10");
-      //El resultado se guarda un una variable y se parsea a entero
-      const codigoEstatus = parseInt(code);
-
-      if (codigoEstatus == codeMemory) {
-        return;
+    this.client.on("data", (data) => {
+      if (this.estatusActual == this.estatusActual) {
+        console.log("nueva informacion");
+        this.sendData(this.estatusActual, this.idEstacion);
       } else {
-        codeMemory = codigoEstatus;
+        console.log("Same data");
+      }
+      console.log(data.toString());
+    });
 
-        fetch("http://localhost:3000/api/estatus/actualizarEstatus", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            colorId: 1000,
-            idLineaProduccion: 11,
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data);
-          });
+    this.client.on("error", (err) => {
+      console.log(`ERROR: ${err}`);
+      this.isConnected = false;
+    });
 
-        //Se imprime la variable
-        console.log(codigoEstatus);
+    this.client.on("close", () => {
+      console.log("PLC desconectado");
+      this.isConnected = false;
+    });
+  }
+
+  //Funcion de polling
+  polling() {
+    //Establece un interval
+    this.pollingInterval = setInterval(() => {
+      //Checa si esta conectado
+      if (this.isConnected) {
+        //Si esta conectado envia el comando
+        this.estatusActual = parseInt(this.client.write(this.comandoParseado1));
+        this.idEstacion = parseInt(this.client.write(this.comandoParseado2));
       }
     }, 2000);
-  } catch (err) {
-    //En caso de error se imprime
-    console.log(err);
   }
-};
-module.exports = { main };
+
+  tryReconnect() {
+    clearInterval(this.pollingInterval);
+
+    setTimeout(() => {
+      console.log("Reintentar conexion....");
+      this.client.destroy();
+      this.client = new net.Socket();
+      this.connect();
+    }, 5000);
+  }
+
+  sendData(codigoColor, idEstacion) {
+    fetch("http://localhost:3000/api/estatus/actualizarEstatus", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        color: codigoColor,
+        idLineaProduccion: idEstacion,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      });
+  }
+}
+
+const PLC = new Client("192.168.0.10", 8501, ["RD DM150", "RD DM149"]);
+
+PLC.connect();
