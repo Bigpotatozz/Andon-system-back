@@ -17,6 +17,7 @@ class Client {
     this.isConnected = false;
     this.estatusActual = 0;
     this.idEstacion = 0;
+    this.contador = 0;
   }
 
   //Funcion que se encarga de conectar al PLC
@@ -34,16 +35,30 @@ class Client {
       this.polling();
     });
 
+    //Escucha la informacion que expone el plc
     this.client.on("data", (data) => {
-      if (this.estatusActual == this.estatusActual) {
-        console.log("nueva informacion");
-        this.sendData(this.estatusActual, this.idEstacion);
-      } else {
-        console.log("Same data");
+      if (this.contador == 1) {
+        this.idEstacion = parseInt(data.toString());
       }
-      console.log(data.toString());
-    });
+      if (this.contador == 2) {
+        let estatus = parseInt(data.toString());
+        this.estatusActual = parseInt(data.toString());
 
+        if (estatus == this.estatusActual) {
+          console.log("Same data");
+        } else {
+          this.sendData(this.estatusActual, this.idEstacion);
+        }
+      }
+
+      if (this.contador >= 2) {
+        this.contador = 0;
+      }
+      this.contador++;
+
+      console.log(`esto es el string: ${this.estatusActual}`);
+      console.log(this.contador);
+    });
     this.client.on("error", (err) => {
       console.log(`ERROR: ${err}`);
       this.isConnected = false;
@@ -62,8 +77,8 @@ class Client {
       //Checa si esta conectado
       if (this.isConnected) {
         //Si esta conectado envia el comando
-        this.estatusActual = parseInt(this.client.write(this.comandoParseado1));
-        this.idEstacion = parseInt(this.client.write(this.comandoParseado2));
+        this.client.write(this.comandoParseado1);
+        this.client.write(this.comandoParseado2);
       }
     }, 2000);
   }
