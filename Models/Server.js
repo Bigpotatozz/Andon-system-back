@@ -53,7 +53,13 @@ class ServerNode {
     });
 
     this.io = new Server(this.httpServer, {
-      cors: "*",
+      cors: {
+        origin: "http://localhost:7001", // SINTAXIS CORRECTA
+        methods: ["GET", "POST"],
+        credentials: true,
+      },
+      transports: ["websocket"],
+      allowUpgrades: false,
     });
 
     this.app.set("io", this.io);

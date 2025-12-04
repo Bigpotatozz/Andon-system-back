@@ -112,6 +112,8 @@ class Client {
   }
 }
 
+/*
 const PLC = new Client("192.168.0.10", 8501, ["RD DM150", "RD DM149"]);
 
 PLC.connect();
+*/
