@@ -7,6 +7,8 @@ const {
   obtenerEstatusProductionRatio,
   activarEstatus,
   obtenerEstatusRatio,
+  obtenerProductionRatio,
+  actualizarProgresoProduccion,
 } = require("../Controllers/estatusController");
 const upload = require("../Helpers/fileUpload");
 
@@ -29,6 +31,13 @@ estatus_router.get(
 );
 estatus_router.post("/activarEstatus", activarEstatus);
 estatus_router.get("/obtenerEstatusRatio", obtenerEstatusRatio);
+
+estatus_router.get("/obtenerProductionRatio", obtenerProductionRatio);
+
+estatus_router.post(
+  "/actualizarProgresoProduccion",
+  actualizarProgresoProduccion
+);
 
 //estatus_router.get("/obtenerEstatusSocket");
 

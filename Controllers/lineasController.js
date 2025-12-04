@@ -127,7 +127,7 @@ const obtenerLineasRegistradas = async (req, res) => {
 };
 
 const actualizarProductionRatio = async (req, res) => {
-  const { lunch, descanso, paro, kyt } = req.body;
+  const { lunch, descanso, paro, kyt, turno, cicleTime } = req.body;
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
@@ -143,6 +143,11 @@ const actualizarProductionRatio = async (req, res) => {
     const queryKYT = `UPDATE estatus set tiempoDefinido = ? where colorId = 1014;`;
     const responseKYT = await pool.query(queryKYT, [kyt]);
 
+    const queryPlan = `UPDATE turno set objetivoProduccion = ? where idTurno = ?;`;
+    const plan = await pool.query(queryPlan, [
+      Math.round(3600 / cicleTime),
+      turno,
+    ]);
     await connection.commit();
     return res.send({
       message: "Actualizado correctamente",
