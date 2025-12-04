@@ -48,7 +48,7 @@ class ServerNode {
 
   //Funcion de escucha
   listen() {
-    this.httpServer = this.app.listen(3000, () => {
+    this.httpServer = this.app.listen(process.env.PORT || 3000, () => {
       console.log("Servidor corriendo en el puerto 3000");
     });
 
