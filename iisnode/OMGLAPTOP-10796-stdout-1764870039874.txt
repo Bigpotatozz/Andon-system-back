@@ -1,0 +1,5 @@
+[dotenv@17.2.3] injecting env (4) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+Servidor corriendo en el puerto 3000
+Conectado a la base de datos
+Conectado a la base de datos
