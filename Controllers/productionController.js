@@ -39,7 +39,34 @@ const actualizarProgresoProduccion = async (req, res) => {
   }
 };
 
+const obtenerTurno = async (req, res) => {
+  try {
+    const queryEnviarTurno = `
+                                SELECT * 
+                                FROM turno
+                                WHERE (
+                                  (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
+                                  OR
+                                  (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
+                                )
+                                LIMIT 1
+                              `;
+    const response = await pool.query(queryEnviarTurno);
+
+    console.log(response);
+
+    return res.status(200).send({
+      turno: response[0],
+    });
+  } catch (e) {
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
 module.exports = {
   obtenerProductionRatio,
   actualizarProgresoProduccion,
+  obtenerTurno,
 };
