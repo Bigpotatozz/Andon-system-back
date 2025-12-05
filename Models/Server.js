@@ -6,6 +6,7 @@ const { lineaRouter } = require("../Routes/LineasRoutes.js");
 const { estatus_router } = require("../Routes/EstatusRoutes.js");
 const { historicoRouter } = require("../Routes/HistoricoRoutes.js");
 const { socketRoutes } = require("../Routes/SocketRoutes.js");
+const { turnoRouter } = require("../Routes/TurnoRoutes.js");
 
 //Inicializacion de la aplicacion
 class ServerNode {
@@ -40,6 +41,7 @@ class ServerNode {
     this.app.use("/api/linea", lineaRouter);
     this.app.use("/api/estatus", estatus_router);
     this.app.use("/api/historico/", historicoRouter);
+    this.app.use("/api/turno/", turnoRouter);
   }
 
   socketEvents() {
@@ -48,7 +50,7 @@ class ServerNode {
 
   //Funcion de escucha
   listen() {
-    this.httpServer = this.app.listen(process.env.PORT || 3000, () => {
+    this.httpServer = this.app.listen(3000, () => {
       console.log("Servidor corriendo en el puerto 3000");
     });
 

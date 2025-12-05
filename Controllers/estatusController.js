@@ -309,8 +309,6 @@ const obtenerEstatusRatio = async (req, res) => {
       });
     }
 
-    const cicleTimeQuery = "selet *";
-
     return res.status(200).send({
       response: estatusRatio[0],
     });
@@ -322,46 +320,32 @@ const obtenerEstatusRatio = async (req, res) => {
   }
 };
 
-const obtenerProductionRatio = async (req, res) => {
+const obtenerEstatusTiempos = async (req, res) => {
   try {
-    const productionRatioQuery = `select * from lineaproduccion join turno on turno.idLineaProduccion = lineaproduccion.idLineaProduccion;`;
+    const queryEstatusTiempos = `SELECT * 
+                    FROM estacion 
+                    JOIN detalleEstacion ON estacion.idEstacion = detalleEstacion.idEstacion
+                    JOIN estatus ON estatus.idEstatus = detalleEstacion.idEstatus
+                    JOIN tiempo ON tiempo.idTiempo = detalleEstacion.idTiempo
+                    ORDER BY estacion.idEstacion;`;
 
-    const productionRatio = await pool.query(productionRatioQuery);
+    const tiempos = await pool.query(queryEstatusTiempos);
 
-    if (!productionRatio) {
+    if (tiempos[0].length <= 0) {
       return res.status(404).send({
-        message: "No hay turnos registrados",
+        message: "No hay estatus activos",
       });
     }
 
     return res.status(200).send({
-      productionRatio: productionRatio[0],
-    });
-  } catch (e) {
-    return res.status(200).send({
-      message: "Hubo un error",
-    });
-  }
-};
-
-const actualizarProgresoProduccion = async (req, res) => {
-  const { turno } = req.body;
-  try {
-    const query =
-      "update turno set progresoProduccion = progresoProduccion + 1 where idTurno = ?";
-    const response = await pool.query(query, [turno]);
-
-    return res.status(200).send({
-      message: "Progreso actualizado",
+      tiempos: tiempos[0],
     });
   } catch (e) {
     return res.status(500).send({
       message: "Hubo un error",
     });
   }
-  const query = `update turno set progresoProduccion = ? where idTurno = ?;`;
 };
-
 const socketObtenerEstatus = async (socket) => {
   const query = `select estacion.nombre AS nombreEstacion, estacion.idEstacion, estacion.estatusActual, detalleEstacion.*, estatus.*, tiempo.* 
 from estacion 
@@ -387,6 +371,5 @@ module.exports = {
   activarEstatus,
   obtenerEstatusRatio,
   socketObtenerEstatus,
-  obtenerProductionRatio,
-  actualizarProgresoProduccion,
+  obtenerEstatusTiempos,
 };
