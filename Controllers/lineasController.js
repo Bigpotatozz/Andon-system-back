@@ -29,15 +29,24 @@ const crearLinea = async (req, res) => {
     for (const turno of turnos) {
       //INSERTA CADA UNO DE LOS TURNOS
       const insertarTurnosQuery =
-        "INSERT INTO turno(nombreTurno, horaInicio, horaFin, objetivoProduccion, progresoProduccion, idLineaProduccion) values (?,?,?,?,?,?)";
+        "INSERT INTO turno(nombreTurno, horaInicio, horaFin, idLineaProduccion) values (?,?,?,?)";
 
       const insertarTurnos = await connection.query(insertarTurnosQuery, [
         turno.nombre,
         turno.horaInicio,
         turno.horaFin,
-        0,
-        0,
         idLineaProduccion,
+      ]);
+
+      const insertarObjetivosQuery = `insert into objetivo(objetivoProduccionHora, objetivoProduccion, progresoProduccion, activo, idTurno)
+      VALUES (?,?,?,?,?)`;
+
+      const insertarObjetivos = await connection.query(insertarObjetivosQuery, [
+        0,
+        0,
+        0,
+        true,
+        insertarTurnos[0].insertId,
       ]);
     }
 
