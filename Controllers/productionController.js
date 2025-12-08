@@ -26,7 +26,7 @@ const actualizarProgresoProduccion = async (req, res) => {
   const { turno } = req.body;
   try {
     const query =
-      "update turno set progresoProduccion = progresoProduccion + 1 where idTurno = ?";
+      "update objetivo set progresoProduccion = progresoProduccion + 1, progresoProduccionHora = progresoProduccionHora + 1 where idTurno = ?";
     const response = await pool.query(query, [turno]);
 
     return res.status(200).send({
@@ -65,10 +65,28 @@ const obtenerTurno = async (req, res) => {
   }
 };
 
+const resetearProgresoProduccionHora = async (req, res) => {
+  const { turno } = req.params;
+  try {
+    const query = `update objetivo set progresoProduccionHora = 0 where idTurno = ?`;
+
+    const reseteo = await pool.query(query, [turno]);
+
+    return res.status(200).send({
+      message: "Progreso reseteado",
+    });
+  } catch (e) {
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
 const socketObtenerTurno = async (socket) => {
   const socketQuery = `
                                 SELECT * 
                                 FROM turno
+                                INNER JOIN objetivo ON objetivo.idTurno = turno.idTurno
                                 WHERE (
                                   (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
                                   OR
@@ -98,4 +116,5 @@ module.exports = {
   actualizarProgresoProduccion,
   obtenerTurno,
   socketObtenerTurno,
+  resetearProgresoProduccionHora,
 };
