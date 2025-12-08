@@ -141,20 +141,28 @@ const actualizarProductionRatio = async (req, res) => {
   try {
     await connection.beginTransaction();
     const queryLunch = `UPDATE estatus set tiempoDefinido = ? where colorId = 1011;`;
-    const responseLunch = await pool.query(queryLunch, [lunch]);
+    const responseLunch = await connection.query(queryLunch, [lunch]);
 
     const queryDescanso = `UPDATE estatus set tiempoDefinido = ? where colorId = 1012;`;
-    const responseDescanso = await pool.query(queryDescanso, [descanso]);
+    const responseDescanso = await connection.query(queryDescanso, [descanso]);
 
     const queryParo = `UPDATE estatus set tiempoDefinido = ? where colorId = 1013;`;
-    const responseParo = await pool.query(queryParo, [paro]);
+    const responseParo = await connection.query(queryParo, [paro]);
 
     const queryKYT = `UPDATE estatus set tiempoDefinido = ? where colorId = 1014;`;
-    const responseKYT = await pool.query(queryKYT, [kyt]);
+    const responseKYT = await connection.query(queryKYT, [kyt]);
 
-    const queryPlan = `UPDATE turno set objetivoProduccion = ? where idTurno = ?;`;
-    const plan = await pool.query(queryPlan, [
-      Math.round(3600 / cicleTime),
+    const queryTurno = "select * from turno where idTurno = ?";
+    const turnoInfo = await connection.query(queryTurno, [turno]);
+
+    const objetivoProduccionHora = Math.round(3600 / cicleTime);
+    const objetivoProduccion = objetivoProduccionHora * 8;
+
+    console.log(objetivoProduccion, objetivoProduccionHora);
+    const queryPlan = `UPDATE objetivo set objetivoProduccion = ?, objetivoProduccionHora = ? where idTurno = ?;`;
+    const plan = await connection.query(queryPlan, [
+      objetivoProduccion,
+      objetivoProduccionHora,
       turno,
     ]);
     await connection.commit();
