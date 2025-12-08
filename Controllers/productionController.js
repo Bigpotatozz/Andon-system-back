@@ -65,8 +65,37 @@ const obtenerTurno = async (req, res) => {
   }
 };
 
+const socketObtenerTurno = async (socket) => {
+  const socketQuery = `
+                                SELECT * 
+                                FROM turno
+                                WHERE (
+                                  (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
+                                  OR
+                                  (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
+                                )
+                                LIMIT 1
+                              `;
+
+  const estatusInterval = setInterval(async () => {
+    try {
+      const response = await pool.query(socketQuery);
+
+      socket.emit("obtenerTurno", response[0]);
+    } catch (e) {
+      console.log(e);
+    }
+  }, 1000);
+
+  socket.on("disconnect", () => {
+    clearInterval(estatusInterval);
+    console.log("Intervalo terminado");
+  });
+};
+
 module.exports = {
   obtenerProductionRatio,
   actualizarProgresoProduccion,
   obtenerTurno,
+  socketObtenerTurno,
 };
