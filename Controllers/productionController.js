@@ -92,6 +92,7 @@ const socketObtenerTurno = async (socket) => {
                                   OR
                                   (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
                                 )
+                                ORDER BY turno.idTurno DESC
                                 LIMIT 1
                               `;
 
