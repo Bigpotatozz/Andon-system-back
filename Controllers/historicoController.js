@@ -34,4 +34,20 @@ const reset = async (req, res) => {
   }
 };
 
-module.exports = { reset };
+const deleteAll = async (req, res) => {
+  try {
+    const queryBorrar = "call drop_db_procedure();";
+
+    const borrarResponse = await pool.query(queryBorrar);
+
+    return res.status(200).send({
+      message: "Borrado exitoso",
+    });
+  } catch (e) {
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
+module.exports = { reset, deleteAll };
