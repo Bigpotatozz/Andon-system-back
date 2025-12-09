@@ -8,7 +8,7 @@ const {
 
 const turnoRouter = Router();
 
-turnoRouter.get("/obtenerProductionRatio", obtenerProductionRatio);
+turnoRouter.get("/obtenerProductionRatio/:idTurno", obtenerProductionRatio);
 
 turnoRouter.post("/actualizarProgresoProduccion", actualizarProgresoProduccion);
 turnoRouter.get("/obtenerTurno", obtenerTurno);

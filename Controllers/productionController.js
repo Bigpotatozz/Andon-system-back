@@ -1,10 +1,16 @@
 const { pool } = require("../Config/connection");
 
 const obtenerProductionRatio = async (req, res) => {
+  const { idTurno } = req.params;
   try {
-    const productionRatioQuery = `select * from lineaproduccion join turno on turno.idLineaProduccion = lineaproduccion.idLineaProduccion;`;
+    const productionRatioQuery = `select * from lineaproduccion 
+                                join turno on turno.idLineaProduccion = lineaproduccion.idLineaProduccion
+                                join objetivo on objetivo.idTurno = turno.idTurno
+                                where turno.idTurno = ?
+                                LIMIT 1                                
+                                `;
 
-    const productionRatio = await pool.query(productionRatioQuery);
+    const productionRatio = await pool.query(productionRatioQuery, [idTurno]);
 
     if (!productionRatio) {
       return res.status(404).send({
@@ -92,7 +98,6 @@ const socketObtenerTurno = async (socket) => {
                                   OR
                                   (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
                                 )
-                                ORDER BY turno.idTurno DESC
                                 LIMIT 1
                               `;
 
