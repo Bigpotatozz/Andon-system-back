@@ -1,3 +1,4 @@
+const { query } = require("express-validator");
 const { pool } = require("../Config/connection");
 
 //Crea una nueva linea de produccion
@@ -120,7 +121,7 @@ const verificarExistenciaLinea = async (req, res) => {
 const obtenerLineasRegistradas = async (req, res) => {
   try {
     //Consulta para obtener las estaciones
-    const query = `Select idEstacion, nombre from estacion;`;
+    const query = `Select idEstacion, nombre, ip from estacion;`;
     const response = await pool.query(query);
 
     //Devuelve las estaciones
@@ -211,10 +212,33 @@ const obtenerEstacionesTiempos = async (req, res) => {
   }
 };
 
+const registrarIps = async (req, res) => {
+  const { estaciones } = req.body;
+  try {
+    for (let estacion of estaciones) {
+      const queryRegistrarIp =
+        "update estacion set ip = ? where idEstacion = ?";
+      const registrarIp = await pool.query(queryRegistrarIp, [
+        estacion.ip,
+        estacion.idEstacion,
+      ]);
+    }
+
+    return res.status(200).send({
+      message: "Ips registradas correctamente",
+    });
+  } catch (e) {
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
 module.exports = {
   crearLinea,
   verificarExistenciaLinea,
   obtenerLineasRegistradas,
   actualizarProductionRatio,
   obtenerEstacionesTiempos,
+  registrarIps,
 };

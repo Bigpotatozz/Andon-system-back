@@ -5,6 +5,7 @@ const {
   obtenerLineasRegistradas,
   actualizarProductionRatio,
   obtenerEstacionesTiempos,
+  registrarIps,
 } = require("../Controllers/lineasController");
 
 //Rutas de las lineas de produccion
@@ -18,5 +19,7 @@ lineaRouter.get(
   "/obtenerEstacionesTiempos/:idEstacion",
   obtenerEstacionesTiempos
 );
+
+lineaRouter.put("/registrarIp", registrarIps);
 
 module.exports = { lineaRouter };
