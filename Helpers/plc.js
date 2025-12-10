@@ -129,6 +129,8 @@ const obtenerIps = async () => {
 //obtenerIps();
 
 //const PLC = new Client("192.168.0.10", 8501, ["RD DM150", "RD DM149"]);
+
+/*
 setInterval(() => {
   const { rss, heapUsed } = process.memoryUsage();
   console.log(
@@ -138,3 +140,4 @@ setInterval(() => {
     (heapUsed / 1024 / 1024).toFixed(1)
   );
 }, 10000);
+*/
