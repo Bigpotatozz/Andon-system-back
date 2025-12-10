@@ -1,3 +1,4 @@
+const { default: axios } = require("axios");
 const net = require("net");
 
 //Se crea una clase Client
@@ -112,8 +113,28 @@ class Client {
   }
 }
 
-/*
-const PLC = new Client("192.168.0.10", 8501, ["RD DM150", "RD DM149"]);
+const obtenerIps = async () => {
+  const response = await axios.get(
+    "http://localhost:3000/api/linea/obtenerLineasRegistradas"
+  );
 
-PLC.connect();
-*/
+  console.log(response.data);
+
+  response.data.lineas.forEach((e) => {
+    const PLC = new Client(e.ip, 8501, ["RD DM150", "RD DM149"]);
+    PLC.connect();
+  });
+};
+
+//obtenerIps();
+
+//const PLC = new Client("192.168.0.10", 8501, ["RD DM150", "RD DM149"]);
+setInterval(() => {
+  const { rss, heapUsed } = process.memoryUsage();
+  console.log(
+    "RSS MB:",
+    (rss / 1024 / 1024).toFixed(1),
+    "Heap MB:",
+    (heapUsed / 1024 / 1024).toFixed(1)
+  );
+}, 10000);
