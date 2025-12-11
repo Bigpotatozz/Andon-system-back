@@ -1,6 +1,7 @@
 const { socketObtenerEstatus } = require("../Controllers/estatusController");
 const {
   socketObtenerLineasController,
+  socketObtenerEstaciones,
 } = require("../Controllers/lineasController");
 const { socketObtenerTurno } = require("../Controllers/productionController");
 
@@ -14,6 +15,10 @@ const socketRoutes = async (io) => {
 
     socket.on("obtenerTurno", () => {
       socketObtenerTurno(socket);
+    });
+
+    socket.on("obtenerEstaciones", () => {
+      socketObtenerEstaciones(socket);
     });
   });
 };

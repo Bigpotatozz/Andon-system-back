@@ -121,7 +121,7 @@ const verificarExistenciaLinea = async (req, res) => {
 const obtenerLineasRegistradas = async (req, res) => {
   try {
     //Consulta para obtener las estaciones
-    const query = `Select idEstacion, nombre, ip from estacion;`;
+    const query = `Select idEstacion, nombre,progreso, ip from estacion;`;
     const response = await pool.query(query);
 
     //Devuelve las estaciones
@@ -234,6 +234,25 @@ const registrarIps = async (req, res) => {
   }
 };
 
+const socketObtenerEstaciones = async (socket) => {
+  const socketQuery = `Select idEstacion, nombre,progreso, ip from estacion;`;
+
+  const intervalEstaciones = setInterval(async () => {
+    try {
+      const response = await pool.query(socketQuery);
+
+      socket.emit("obtenerEstaciones", response[0]);
+    } catch (e) {
+      console.log(e);
+    }
+  }, 2000);
+
+  socket.on("disconnect", () => {
+    clearInterval(intervalEstaciones);
+    console.log("Intervalo terminado");
+  });
+};
+
 module.exports = {
   crearLinea,
   verificarExistenciaLinea,
@@ -241,4 +260,5 @@ module.exports = {
   actualizarProductionRatio,
   obtenerEstacionesTiempos,
   registrarIps,
+  socketObtenerEstaciones,
 };

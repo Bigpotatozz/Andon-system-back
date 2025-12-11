@@ -29,11 +29,22 @@ const obtenerProductionRatio = async (req, res) => {
 };
 
 const actualizarProgresoProduccion = async (req, res) => {
-  const { turno } = req.body;
   try {
+    const queryTurno = `SELECT * 
+                                FROM turno
+                                WHERE (
+                                  (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
+                                  OR
+                                  (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
+                                )
+                                LIMIT 1`;
+
+    const turno = await pool.query(queryTurno);
+    console.log(turno[0][0]);
+
     const query =
       "update objetivo set progresoProduccion = progresoProduccion + 1, progresoProduccionHora = progresoProduccionHora + 1 where idTurno = ?";
-    const response = await pool.query(query, [turno]);
+    const response = await pool.query(query, [turno[0][0].idTurno]);
 
     return res.status(200).send({
       message: "Progreso actualizado",
