@@ -1,5 +1,6 @@
 const { query } = require("express-validator");
 const { pool } = require("../Config/connection");
+const { obtenerIps } = require("../Helpers/plc");
 
 //Crea una nueva linea de produccion
 const crearLinea = async (req, res) => {
@@ -223,6 +224,8 @@ const registrarIps = async (req, res) => {
         estacion.idEstacion,
       ]);
     }
+
+    obtenerIps();
 
     return res.status(200).send({
       message: "Ips registradas correctamente",

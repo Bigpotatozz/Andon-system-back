@@ -1,10 +1,7 @@
 const { default: axios } = require("axios");
 const net = require("net");
-const { ClientProduccion } = require("./plc_estatus");
 
-//Se crea una clase Client
-class Client {
-  //Se crea su constructor
+class ClientProduccion {
   constructor(ip, puerto, comandos) {
     this.ip = ip;
     this.puerto = puerto;
@@ -26,7 +23,6 @@ class Client {
     this.indiceComandoActual = 0; // Reemplaza a 'contador'
   }
 
-  //Funcion que se encarga de conectar al PLC
   connect() {
     //Se conecta al PLC
     this.client.connect(this.puerto, this.ip);
@@ -43,7 +39,6 @@ class Client {
 
     this.client.on("data", (data) => {
       this.buffer += data.toString();
-      console.log(data.toString());
 
       // 2. Procesar mientras haya delimitadores completos (\r\n)
       let delimiterIndex;
@@ -76,22 +71,22 @@ class Client {
   procesarRespuesta(mensaje) {
     const valor = parseInt(mensaje);
 
-    console.log(valor);
     if (isNaN(valor)) return; // Ignorar basura
 
     // Usar el índice actual para saber qué es
     switch (this.indiceComandoActual) {
-      case 0: // Estatus
-        this.procesarEstatus(valor);
-        break;
-      case 1: // ID Estacion
+      case 0: // ID Estacion
         this.idEstacion = valor;
         console.log(`Estacion: ${this.idEstacion}`);
         break;
-      case 2: // Producido
-        this.procesarProduccion(valor);
-        break;
-      default:
+      case 1:
+        this.producido = valor;
+
+        if (this.producido !== 0) {
+          this.marcarProducido(this.idEstacion);
+        }
+
+        console.log(`Producido: ${this.producido}`);
     }
 
     this.indiceComandoActual++;
@@ -100,31 +95,6 @@ class Client {
     }
   }
 
-  procesarEstatus(nuevoEstatus) {
-    console.log(`Estatus: ${nuevoEstatus}`);
-    // Solo enviar si cambió Y si tenemos un ID de estación válido
-    if (
-      this.estatusAnterior !== null &&
-      nuevoEstatus !== this.estatusAnterior
-    ) {
-      console.log(
-        `CAMBIO DETECTADO: ${this.estatusAnterior} -> ${nuevoEstatus}`
-      );
-      this.sendData(nuevoEstatus, this.idEstacion);
-    }
-    this.estatusAnterior = this.estatusActual; // Guardar previo
-    this.estatusActual = nuevoEstatus; // Actualizar actual
-  }
-
-  procesarProduccion(valor) {
-    this.producido = valor;
-    console.log(`Producido: ${this.producido}`);
-
-    if (this.producido === 1) {
-      console.log("¡Producción detectada!");
-      this.marcarProducido(this.idEstacion);
-    }
-  }
   //Funcion de polling
   polling() {
     //Establece un interval
@@ -132,27 +102,14 @@ class Client {
       //Checa si esta conectado
       if (this.isConnected) {
         this.comandos.forEach((cmd) => {
-          console.log(cmd);
-
           this.client.write(cmd + "\r\n");
         });
       }
     }, 2000);
   }
 
-  tryReconnect() {
-    clearInterval(this.pollingInterval);
-
-    setTimeout(() => {
-      console.log("Reintentar conexion....");
-      this.client.destroy();
-      this.client = new net.Socket();
-      this.connect();
-    }, 5000);
-  }
-
-  sendData(codigoColor, idEstacion) {
-    fetch("http://localhost:3000/api/estatus/actualizarEstatus", {
+  marcarProducido = async (idEstacion) => {
+    fetch("http://localhost:3000/api/turno/actualizarProgresoProduccion", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -166,28 +123,24 @@ class Client {
       .then((data) => {
         console.log(data);
       });
+  };
+
+  tryReconnect() {
+    clearInterval(this.pollingInterval);
+
+    setTimeout(() => {
+      console.log("Reintentar conexion....");
+      this.client.destroy();
+      this.client = new net.Socket();
+      this.connect();
+    }, 5000);
   }
 }
 
-const obtenerIps = async () => {
-  const response = await axios.get(
-    "http://localhost:3000/api/linea/obtenerLineasRegistradas"
-  );
+const PLC = new ClientProduccion("192.168.0.10", 8501, [
+  "RD DM149",
+  "RD DM151",
+]);
+PLC.connect();
 
-  console.log(response.data);
-
-  response.data.lineas.forEach((e) => {
-    const PLC = new Client(e.ip, 8501, ["RD DM150", "RD DM149"]);
-    PLC.connect();
-    const PLCPRODUCCION = new ClientProduccion(e.ip, 8501, [
-      "RD DM149",
-      "RD DM151",
-    ]);
-
-    PLCPRODUCCION.connect();
-  });
-};
-
-obtenerIps();
-
-module.exports = { Client, obtenerIps };
+module.exports = { ClientProduccion };
