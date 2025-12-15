@@ -107,6 +107,38 @@ El sistema gestiona conexiones TCP persistentes con los PLCs mediante:
 - Validación de integridad de mensajes TCP
 - Registro de eventos y errores de comunicación
 
-### Configuración de PLC
+## Mantenimiento
 
-Ejemplo de configuración en `Config/plc.config.js`:
+- Ejecutar `npm update` periódicamente para actualizar dependencias
+- Monitorear logs de conexiones PLC y errores de comunicación
+- Realizar respaldos periódicos de la base de datos
+- Revisar y optimizar consultas SQL según crecimiento de datos
+- Actualizar scripts de PLC ante cambios de firmware
+- Implementar rotación de logs para evitar saturación de disco
+
+## Seguridad
+
+- Validación de datos en todos los endpoints
+- Autenticación mediante JWT (si aplica)
+- Sanitización de inputs para prevenir inyección SQL
+- Rate limiting en endpoints críticos
+- CORS configurado para dominios autorizados
+- Variables sensibles almacenadas en `.env`
+
+## Troubleshooting
+
+### Error de conexión a base de datos
+
+Verificar credenciales en `.env` y que el servidor de base de datos esté activo.
+
+### PLC no conecta
+
+Revisar conectividad de red, IP, puerto y firewall. Validar script de comunicación para la marca específica.
+
+### WebSocket desconectado
+
+Verificar que el puerto esté abierto y el CORS configurado correctamente.
+
+##
+
+author: Oscar MG
