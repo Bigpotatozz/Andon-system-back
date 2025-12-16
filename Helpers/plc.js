@@ -194,14 +194,14 @@ const obtenerEstaciones = async () => {
 
   const PLC = new Client("192.168.0.10", 8501, comandos);
   PLC.connect();
+
+  if (PLC.isConnected) {
+    PLC.client.destroy();
+  }
 };
 
 // Uso
 
-/*
-const PLC = new Client("192.168.0.10", 8501, ["RD DM"]);
-
-PLC.connect();
-*/
+obtenerEstaciones();
 
 module.exports = { Client, obtenerEstaciones };
