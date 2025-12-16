@@ -137,10 +137,4 @@ class ClientProduccion {
   }
 }
 
-const PLC = new ClientProduccion("192.168.0.10", 8501, [
-  "RD DM149",
-  "RD DM151",
-]);
-PLC.connect();
-
 module.exports = { ClientProduccion };

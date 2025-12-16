@@ -6,6 +6,7 @@ const {
   actualizarProductionRatio,
   obtenerEstacionesTiempos,
   registrarIps,
+  iniciarPLC,
 } = require("../Controllers/lineasController");
 
 //Rutas de las lineas de produccion
@@ -21,5 +22,7 @@ lineaRouter.get(
 );
 
 lineaRouter.put("/registrarIp", registrarIps);
+
+lineaRouter.get("/iniciarPLC", iniciarPLC);
 
 module.exports = { lineaRouter };

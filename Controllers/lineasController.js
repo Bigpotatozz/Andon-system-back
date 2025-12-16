@@ -1,6 +1,6 @@
 const { query } = require("express-validator");
 const { pool } = require("../Config/connection");
-const { obtenerIps } = require("../Helpers/plc");
+const { obtenerIps, obtenerEstaciones } = require("../Helpers/plc");
 
 //Crea una nueva linea de produccion
 const crearLinea = async (req, res) => {
@@ -122,7 +122,7 @@ const verificarExistenciaLinea = async (req, res) => {
 const obtenerLineasRegistradas = async (req, res) => {
   try {
     //Consulta para obtener las estaciones
-    const query = `Select idEstacion, nombre,progreso, ip from estacion;`;
+    const query = `Select idEstacion, nombre,progreso from estacion;`;
     const response = await pool.query(query);
 
     //Devuelve las estaciones
@@ -237,6 +237,20 @@ const registrarIps = async (req, res) => {
   }
 };
 
+const iniciarPLC = async (req, res) => {
+  try {
+    obtenerEstaciones();
+
+    return res.status(200).send({
+      message: "PLC iniciado correctamente",
+    });
+  } catch (e) {
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
 const socketObtenerEstaciones = async (socket) => {
   const socketQuery = `Select idEstacion, nombre,progreso, ip from estacion;`;
 
@@ -264,4 +278,5 @@ module.exports = {
   obtenerEstacionesTiempos,
   registrarIps,
   socketObtenerEstaciones,
+  iniciarPLC,
 };
