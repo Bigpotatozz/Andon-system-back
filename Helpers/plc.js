@@ -40,6 +40,7 @@ class Client {
     //Se ejecuta cuando recibe datos
     this.client.on("data", (data) => {
       //Todas las respuestas del plc las va concatenando aqui
+
       this.buffer += data.toString();
 
       let delimiterIndex;
@@ -109,8 +110,7 @@ class Client {
 
   finalizarCiclo() {
     // Aquí tienes TODOS los valores del polling actual
-    console.log("Ciclo completado:", this.valoresCicloActual);
-    console.log("Ciclo anterior:", this.valoresCicloAnterior);
+    console.log("CICLO COMPLETADO ESTATUS:", this.valoresCicloActual);
 
     this.valoresCicloActual.forEach((valor, index) => {
       if (valor !== this.valoresCicloAnterior[index]) {
@@ -179,24 +179,36 @@ class Client {
 }
 
 const obtenerEstaciones = async () => {
-  const response = await axios.get(
-    "http://localhost:3000/api/linea/obtenerLineasRegistradas"
-  );
+  try {
+  } catch (e) {}
 
-  console.log(response.data);
+  try {
+    const response = await axios.get(
+      "http://localhost:3000/api/linea/obtenerLineasRegistradas"
+    );
 
-  contador = 150;
-  const comandos = [];
-  response.data.lineas.forEach((e) => {
-    comandos.push(`RD DM${contador}`);
-    contador++;
-  });
+    console.log(response.data);
 
-  const PLC = new Client("192.168.0.10", 8501, comandos);
-  PLC.connect();
+    let contador = 150;
+    let contador2 = 200;
+    const comandos = [];
+    const comandos2 = [];
+    response.data.lineas.forEach((e) => {
+      comandos.push(`RD DM${contador}`);
 
-  if (PLC.isConnected) {
-    PLC.client.destroy();
+      comandos2.push(`RD DM${contador2}`);
+      contador++;
+      contador2++;
+    });
+
+    const PLC = new Client("192.168.0.10", 8501, comandos);
+    PLC.connect();
+
+    if (PLC.isConnected) {
+      PLC.client.destroy();
+    }
+  } catch (e) {
+    console.log(e);
   }
 };
 

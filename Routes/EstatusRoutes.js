@@ -34,7 +34,7 @@ estatus_router.post("/activarEstatus", activarEstatus);
 estatus_router.get("/obtenerEstatusRatio", obtenerEstatusRatio);
 estatus_router.get("/obtenerEstatusTiempos", obtenerEstatusTiempos);
 estatus_router.get("/obtenerEstatusModificar", obtenerEstatusModificar);
-estatus_router.put("/modificarEstatus", modificarEstatus);
+estatus_router.put("/modificarEstatus", upload.any(), modificarEstatus);
 
 //estatus_router.get("/obtenerEstatusSocket");
 

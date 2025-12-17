@@ -394,6 +394,7 @@ const modificarEstatus = async (req, res) => {
     });
   }
 };
+
 const socketObtenerEstatus = async (socket) => {
   const query = `select estacion.nombre AS nombreEstacion, estacion.idEstacion, estacion.estatusActual, detalleEstacion.*, estatus.*, tiempo.* 
 from estacion 
