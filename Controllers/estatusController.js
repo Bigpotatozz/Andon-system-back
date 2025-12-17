@@ -346,6 +346,54 @@ const obtenerEstatusTiempos = async (req, res) => {
     });
   }
 };
+
+const obtenerEstatusModificar = async (req, res) => {
+  try {
+    const queryEstatus = "select * from estatus where colorId < 1011";
+    const estatus = await pool.query(queryEstatus);
+
+    if (estatus[0].length <= 0) {
+      return res.status(404).send({
+        message: "No hay estatus activos",
+      });
+    }
+
+    return res.status(200).send({
+      estatus: estatus[0],
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
+const modificarEstatus = async (req, res) => {
+  const { ids } = req.body;
+
+  console.log(ids);
+  try {
+    const queryModificarEstatus =
+      "update estatus set prioridad = ? where idEstatus = ?";
+
+    for (let id of ids) {
+      const modificarEstatus = await pool.query(queryModificarEstatus, [
+        id.peso,
+        id.idEstatus,
+      ]);
+    }
+
+    return res.status(200).send({
+      message: "Estatus modificado correctamente",
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
 const socketObtenerEstatus = async (socket) => {
   const query = `select estacion.nombre AS nombreEstacion, estacion.idEstacion, estacion.estatusActual, detalleEstacion.*, estatus.*, tiempo.* 
 from estacion 
@@ -372,4 +420,6 @@ module.exports = {
   obtenerEstatusRatio,
   socketObtenerEstatus,
   obtenerEstatusTiempos,
+  obtenerEstatusModificar,
+  modificarEstatus,
 };

@@ -8,6 +8,8 @@ const {
   activarEstatus,
   obtenerEstatusRatio,
   obtenerEstatusTiempos,
+  obtenerEstatusModificar,
+  modificarEstatus,
 } = require("../Controllers/estatusController");
 const upload = require("../Helpers/fileUpload");
 
@@ -31,6 +33,8 @@ estatus_router.get(
 estatus_router.post("/activarEstatus", activarEstatus);
 estatus_router.get("/obtenerEstatusRatio", obtenerEstatusRatio);
 estatus_router.get("/obtenerEstatusTiempos", obtenerEstatusTiempos);
+estatus_router.get("/obtenerEstatusModificar", obtenerEstatusModificar);
+estatus_router.put("/modificarEstatus", modificarEstatus);
 
 //estatus_router.get("/obtenerEstatusSocket");
 
