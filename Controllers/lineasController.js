@@ -252,7 +252,7 @@ const iniciarPLC = async (req, res) => {
 };
 
 const socketObtenerEstaciones = async (socket) => {
-  const socketQuery = `Select idEstacion, nombre,progreso, ip from estacion;`;
+  const socketQuery = `Select idEstacion, nombre,progreso from estacion;`;
 
   const intervalEstaciones = setInterval(async () => {
     try {
