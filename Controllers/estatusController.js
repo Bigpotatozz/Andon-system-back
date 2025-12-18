@@ -216,7 +216,7 @@ const obtenerEstatus = async (req, res) => {
 //Obtiene el estatus especificos de una linea de produccion
 const obtenerEstatusEspecifico = async (req, res) => {
   //Accede a los params
-  const { idEstatus } = req.params;
+  const { idEstacion } = req.params;
   try {
     //Obtiene el estatus especifico
     const query = `select * from estacion 
@@ -225,13 +225,7 @@ const obtenerEstatusEspecifico = async (req, res) => {
                     where estacion.idEstacion = detalleEstacion.idEstacion
                     and estacion.idEstacion = ?;`;
 
-    const response = await pool.query(query, [idEstatus]);
-
-    if (response[0].length == 0) {
-      return res.status(404).send({
-        message: "Linea de produccion no existente",
-      });
-    }
+    const response = await pool.query(query, [idEstacion]);
 
     //Obtiene el detalle de la linea junto con sus tablas
     const query2 = `SELECT * 
@@ -241,7 +235,7 @@ const obtenerEstatusEspecifico = async (req, res) => {
                     JOIN tiempo ON tiempo.idTiempo = detalleEstacion.idTiempo
                     WHERE estacion.idEstacion = ?;
                     `;
-    const response2 = await pool.query(query2, [idEstatus]);
+    const response2 = await pool.query(query2, [idEstacion]);
 
     //Devuelve la informacion obtenida
     return res.status(200).send({

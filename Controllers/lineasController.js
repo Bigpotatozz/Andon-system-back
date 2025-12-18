@@ -1,6 +1,7 @@
 const { query } = require("express-validator");
 const { pool } = require("../Config/connection");
 const { obtenerIps, obtenerEstaciones } = require("../Helpers/plc");
+const { obtenerEstacionesProduccion } = require("../Helpers/plc_estatus");
 
 //Crea una nueva linea de produccion
 const crearLinea = async (req, res) => {
@@ -240,11 +241,13 @@ const registrarIps = async (req, res) => {
 const iniciarPLC = async (req, res) => {
   try {
     obtenerEstaciones();
+    obtenerEstacionesProduccion();
 
     return res.status(200).send({
       message: "PLC iniciado correctamente",
     });
   } catch (e) {
+    console.log(e);
     return res.status(500).send({
       message: "Hubo un error",
     });
