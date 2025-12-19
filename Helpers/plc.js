@@ -16,6 +16,12 @@ class Client {
     this.valoresCicloAnterior = new Array(cantidad).fill(null);
     this.valoresCicloActual = [];
     this.reconnectTimer = null;
+
+    this.valoresEstatusAnterior = [];
+    this.valoresEstatusActual = [];
+
+    this.ciclosCompletados = 0;
+    this.maxCiclosSinReconectar = 100;
   }
 
   connect() {
@@ -131,15 +137,34 @@ class Client {
     } else {
       this.finalizarCiclo();
     }
+
+    this.ciclosCompletados++;
+
+    if (this.ciclosCompletados >= this.maxCiclosSinReconectar) {
+      console.log("Reconexión preventiva (limpieza de buffers)");
+      this.ciclosCompletados = 0;
+      this.client.destroy();
+      setTimeout(() => this.connect(), 5000);
+      return;
+    }
   }
 
   finalizarCiclo() {
     console.log("Ciclo completado ESTATUS:", this.valoresCicloActual);
 
+    const valoresPartidos = this.valoresCicloActual.slice(
+      this.valoresCicloActual.length / 2
+    );
+
+    this.valoresEstatusActual = valoresPartidos[0];
+
+    const estatus = valoresPartidos[0];
+    const produccion = valoresPartidos[1];
+
     // Comparamos con el ciclo anterior
     this.valoresCicloActual.forEach((valor, index) => {
       if (valor !== this.valoresCicloAnterior[index] && valor !== null) {
-        // index + 1 asume que tus estaciones son 1, 2, 3...
+        // index + 1 asume que las estaciones son secuenciales.
         this.sendData(valor, index + 1);
       }
     });
