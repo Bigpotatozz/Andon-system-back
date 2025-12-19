@@ -1,6 +1,5 @@
 const { response } = require("express");
 const { pool } = require("../Config/connection");
-
 //Registro de nuevos estatus
 const crearEstatus = async (req, res) => {
   //Accede al body de la peticion y lo parsea a JSON
@@ -173,12 +172,13 @@ const actualizarEstatus = async (req, res) => {
     ]);
 
     const io = req.app.get("io"); // Obtener instancia de io
-    socketObtenerEstatus(io);
 
     //Devuelve una respuesta exitosa
-    return res.status(200).send({
+    res.status(200).send({
       message: detalleestatus[0],
     });
+
+    setImmediate(() => socketObtenerEstatus(io));
   } catch (e) {
     //Devuelve un error como respuesta
     console.log(e);
