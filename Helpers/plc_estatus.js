@@ -86,6 +86,10 @@ class ClientProduccion {
   iniciarCiclo() {
     if (!this.isConnected) return;
 
+    if (!this.client || !this.client.writable) {
+      console.warn("PLC no disponible para escritura");
+    }
+
     // Enviamos un solo comando para pedir todos los datos
     // RDS DM150 10 -> Lee 10 palabras empezando en DM150
     // Formato Keyence: "RDS DM[inicio] -> [cantidad]\r"
@@ -144,21 +148,7 @@ class ClientProduccion {
     this.valoresCicloAnterior = [...this.valoresCicloActual];
 
     // Esperamos 1 segundo y pedimos de nuevo
-    setTimeout(() => this.iniciarCiclo(), 1000);
-  }
-
-  sendData(codigoColor, idEstacion) {
-    fetch("http://localhost:3000/api/estatus/actualizarEstatus", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        color: codigoColor,
-        idLineaProduccion: idEstacion,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => console.log(`Estación ${idEstacion} actualizada:`, data))
-      .catch((err) => console.error("Error API:", err));
+    setTimeout(() => this.iniciarCiclo(), 1500);
   }
 }
 

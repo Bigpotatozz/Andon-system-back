@@ -86,6 +86,10 @@ class Client {
   iniciarCiclo() {
     if (!this.isConnected) return;
 
+    if (!this.client || !this.client.writable) {
+      console.warn("PLC no disponible para escritura");
+    }
+
     // Enviamos un solo comando para pedir todos los datos
     // RDS DM150 10 -> Lee 10 palabras empezando en DM150
     // Formato Keyence: "RDS DM[inicio] -> [cantidad]\r"
