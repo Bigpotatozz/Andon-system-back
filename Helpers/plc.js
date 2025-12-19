@@ -22,6 +22,7 @@ class Client {
 
     this.ciclosCompletados = 0;
     this.maxCiclosSinReconectar = 100;
+    this.cicloTimeOut = null;
   }
 
   connect() {
@@ -67,22 +68,32 @@ class Client {
     this.client.on("error", (err) => {
       console.error(`Error de conexión: ${err.message}`);
       this.isConnected = false;
+
+      this.limpiarTimeOuts();
       this.scheduleReconnect();
     });
 
     this.client.on("close", () => {
       console.warn("Conexión cerrada.");
       this.isConnected = false;
+      this.limpiarTimeOuts();
       this.scheduleReconnect();
     });
 
     this.client.connect(this.puerto, this.ip);
   }
 
+  limpiarTimeOuts() {
+    if (this.cicloTimeOut) {
+      clearTimeout(this.cicloTimeOut);
+      this.cicloTimeOut = null;
+    }
+  }
   scheduleReconnect() {
     if (this.reconnectTimer) return;
     console.log("Restableciendo conexion");
 
+    this.limpiarTimeOuts();
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
       this.connect();
@@ -95,6 +106,8 @@ class Client {
     if (!this.client || !this.client.writable) {
       console.warn("PLC no disponible para escritura");
     }
+
+    this.esperandoRespuesta = true;
 
     // Enviamos un solo comando para pedir todos los datos
     // RDS DM150 10 -> Lee 10 palabras empezando en DM150
@@ -114,6 +127,7 @@ class Client {
   procesarRespuestaBloque(mensaje) {
     if (mensaje.startsWith("E")) {
       console.error(`Error del PLC: ${mensaje}`);
+      this.limpiarTimeOuts();
       // Si hay error, reintentamos en 2 segundos
       setTimeout(() => this.iniciarCiclo(), 2000);
       return;
@@ -172,8 +186,10 @@ class Client {
     // Guardamos estado y esperamos para el siguiente ciclo
     this.valoresCicloAnterior = [...this.valoresCicloActual];
 
+    this.limpiarTimeOuts();
+
     // Esperamos 1 segundo y pedimos de nuevo
-    setTimeout(() => this.iniciarCiclo(), 2000);
+    this.cicloTimeOut = setTimeout(() => this.iniciarCiclo(), 2000);
   }
 
   sendData(codigoColor, idEstacion) {
