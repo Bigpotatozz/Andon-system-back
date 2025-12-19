@@ -173,7 +173,7 @@ class Client {
     this.valoresCicloAnterior = [...this.valoresCicloActual];
 
     // Esperamos 1 segundo y pedimos de nuevo
-    setTimeout(() => this.iniciarCiclo(), 1000);
+    setTimeout(() => this.iniciarCiclo(), 2000);
   }
 
   sendData(codigoColor, idEstacion) {
