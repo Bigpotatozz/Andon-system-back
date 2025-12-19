@@ -201,16 +201,16 @@ class Client {
         "http://localhost:3000/api/estatus/actualizarEstatus",
         {
           color: codigoColor,
-          estacion: idEstacion,
+          idLineaProduccion: idEstacion,
         }
       );
 
       console.log(`${tipo.toUpperCase()} E${idEstacion}: ${valor}`);
     } catch (err) {
       if (err.code === "ECONNABORTED") {
-        console.error(`${tipo} E${idEstacion}: Timeout`);
+        console.error(`$E${idEstacion}: Timeout`);
       } else {
-        console.error(`${tipo} E${idEstacion}: ${err.message}`);
+        console.error(`E${idEstacion}: ${err.message}`);
       }
     }
   }
