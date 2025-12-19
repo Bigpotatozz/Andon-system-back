@@ -148,6 +148,10 @@ class Client {
   }
 
   sendData(codigoColor, idEstacion) {
+    const controller = new AbortController();
+    const timeutId = setTimeout(() => {
+      controller.abort();
+    });
     fetch("http://localhost:3000/api/estatus/actualizarEstatus", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -155,6 +159,7 @@ class Client {
         color: codigoColor,
         idLineaProduccion: idEstacion,
       }),
+      signal: controller.signal,
     })
       .then((response) => response.json())
       .then((data) => console.log(`Estación ${idEstacion} actualizada:`, data))
