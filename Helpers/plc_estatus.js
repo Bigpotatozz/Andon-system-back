@@ -184,7 +184,7 @@ const obtenerEstacionesProduccion = async () => {
       console.log(`Iniciando monitoreo de ${totalEstaciones} estaciones.`);
 
       //Variable inicial
-      const dmInicio = 200;
+      const dmInicio = 100;
 
       // Creamos el cliente con lógica de BLOQUE
       const PLC = new ClientProduccion(
@@ -202,6 +202,6 @@ const obtenerEstacionesProduccion = async () => {
   }
 };
 
-obtenerEstacionesProduccion();
+//obtenerEstacionesProduccion();
 
 module.exports = { ClientProduccion, obtenerEstacionesProduccion };

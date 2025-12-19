@@ -189,10 +189,15 @@ const obtenerEstaciones = async () => {
       console.log(`Iniciando monitoreo de ${totalEstaciones} estaciones.`);
 
       //Variable inicial
-      const dmInicio = 150;
+      const dmInicio = 100;
 
       // Creamos el cliente con lógica de BLOQUE
-      const PLC = new Client("192.168.0.10", 8501, dmInicio, totalEstaciones);
+      const PLC = new Client(
+        "192.168.0.10",
+        8501,
+        dmInicio,
+        totalEstaciones * 2
+      );
       PLC.connect();
     } else {
       console.log("No hay lineas de produccion registradas");

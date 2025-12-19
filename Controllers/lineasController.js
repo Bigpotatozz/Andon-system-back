@@ -241,7 +241,6 @@ const registrarIps = async (req, res) => {
 const iniciarPLC = async (req, res) => {
   try {
     obtenerEstaciones();
-    obtenerEstacionesProduccion();
 
     return res.status(200).send({
       message: "PLC iniciado correctamente",
