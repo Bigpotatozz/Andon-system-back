@@ -1,28 +1,23 @@
-const { default: axios } = require("axios");
+const axios = require("axios"); // ← Sin "default"
 const net = require("net");
 
 class Client {
   constructor(ip, puerto, dmInicial, cantidad) {
     this.ip = ip;
     this.puerto = puerto;
-
-    // Guardamos qué rango vamos a leer
-    this.dmInicial = dmInicial; // Ej: 150
-    this.cantidad = cantidad; // Ej: 10 estaciones
+    this.dmInicial = dmInicial;
+    this.cantidad = cantidad;
     this.client = null;
     this.isConnected = false;
     this.buffer = "";
-    // Arrays de valores
     this.valoresCicloAnterior = new Array(cantidad).fill(null);
     this.valoresCicloActual = [];
     this.reconnectTimer = null;
 
-    this.valoresEstatusAnterior = [];
-    this.valoresEstatusActual = [];
-
+    this.esperandoRespuesta = false;
+    this.cicloTimeout = null;
     this.ciclosCompletados = 0;
-    this.maxCiclosSinReconectar = 100;
-    this.cicloTimeOut = null;
+    this.maxCiclosSinReconectar = 50;
   }
 
   connect() {
@@ -31,12 +26,14 @@ class Client {
       this.client.destroy();
     }
 
-    this.client = new net.Socket();
+    this.client = new net.Socket({
+      readableHighWaterMark: 256 * 1024,
+      writableHighWaterMark: 256 * 1024,
+    });
 
-    // Mantiene la conexión viva y rápida
     this.client.setKeepAlive(true, 5000);
     this.client.setNoDelay(true);
-    this.client.setTimeout(15000);
+    this.client.setTimeout(30000);
 
     this.client.on("connect", () => {
       this.isConnected = true;
@@ -47,7 +44,15 @@ class Client {
     this.client.on("data", (data) => {
       this.buffer += data.toString();
 
-      // Procesamos solo si tenemos un terminador \r\n
+      // Limita el tamaño del buffer
+      if (this.buffer.length > 10000) {
+        console.error(
+          `Buffer demasiado grande (${this.buffer.length} bytes), reseteando`
+        );
+        this.buffer = "";
+        return;
+      }
+
       let delimiterIndex;
       while ((delimiterIndex = this.buffer.indexOf("\r\n")) !== -1) {
         const mensaje = this.buffer.substring(0, delimiterIndex).trim();
@@ -60,40 +65,43 @@ class Client {
     });
 
     this.client.on("timeout", () => {
-      console.log("PLC NO RESPONDE");
-      this.client.end();
+      console.warn("PLC NO RESPONDE");
       this.client.destroy();
     });
 
     this.client.on("error", (err) => {
       console.error(`Error de conexión: ${err.message}`);
       this.isConnected = false;
-
-      this.limpiarTimeOuts();
+      this.esperandoRespuesta = false;
+      this.limpiarTimeouts();
       this.scheduleReconnect();
     });
 
     this.client.on("close", () => {
-      console.warn("Conexión cerrada.");
+      console.warn("Conexión cerrada");
       this.isConnected = false;
-      this.limpiarTimeOuts();
+      this.esperandoRespuesta = false;
+      this.limpiarTimeouts();
       this.scheduleReconnect();
     });
 
     this.client.connect(this.puerto, this.ip);
   }
 
-  limpiarTimeOuts() {
-    if (this.cicloTimeOut) {
-      clearTimeout(this.cicloTimeOut);
-      this.cicloTimeOut = null;
+  limpiarTimeouts() {
+    //Nombre corregido
+    if (this.cicloTimeout) {
+      clearTimeout(this.cicloTimeout);
+      this.cicloTimeout = null;
     }
   }
+
   scheduleReconnect() {
     if (this.reconnectTimer) return;
-    console.log("Restableciendo conexion");
+    console.log("Reconectando en 5s...");
 
-    this.limpiarTimeOuts();
+    this.limpiarTimeouts();
+
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
       this.connect();
@@ -101,118 +109,115 @@ class Client {
   }
 
   iniciarCiclo() {
-    if (!this.isConnected) return;
+    // Verificación completa
+    if (!this.isConnected || this.esperandoRespuesta) {
+      console.warn("Ciclo bloqueado (esperando respuesta anterior)");
+      return;
+    }
 
     if (!this.client || !this.client.writable) {
-      console.warn("PLC no disponible para escritura");
+      console.warn("Socket no disponible");
+      return;
     }
 
     this.esperandoRespuesta = true;
 
-    // Enviamos un solo comando para pedir todos los datos
-    // RDS DM150 10 -> Lee 10 palabras empezando en DM150
-    // Formato Keyence: "RDS DM[inicio] -> [cantidad]\r"
     const comando = `RDS DM${this.dmInicial} ${this.cantidad}`;
 
     try {
-      const flushed = this.client.write(comando + "\r\n");
-      if (!flushed) {
-        console.warn("Buffer de salida lleno (Red lenta?)");
-      }
+      this.client.write(comando + "\r\n", (err) => {
+        if (err) {
+          console.error(`Error al escribir: ${err.message}`);
+          this.esperandoRespuesta = false;
+        }
+      });
     } catch (err) {
-      console.error("Error al escribir:", err.message);
+      console.error(`Excepción: ${err.message}`);
+      this.esperandoRespuesta = false;
     }
   }
 
   procesarRespuestaBloque(mensaje) {
     if (mensaje.startsWith("E")) {
       console.error(`Error del PLC: ${mensaje}`);
-      this.limpiarTimeOuts();
-      // Si hay error, reintentamos en 2 segundos
-      setTimeout(() => this.iniciarCiclo(), 2000);
+      this.esperandoRespuesta = false;
+
+      this.limpiarTimeouts();
+      this.cicloTimeout = setTimeout(() => this.iniciarCiclo(), 2000);
       return;
     }
 
-    // Respuesta del PLC: "0 1 2 0 4 1 0 0"
-    //Separamos la cadena de texto por espacios
     const valoresRaw = mensaje.split(" ");
-
-    // Convertimos a enteros
     this.valoresCicloActual = valoresRaw.map((v) => {
       const n = parseInt(v);
       return isNaN(n) ? null : n;
     });
 
-    // Validamos que recibimos la cantidad correcta
     if (this.valoresCicloActual.length !== this.cantidad) {
       console.warn(
-        `Recibidos: ${this.valoresCicloActual.length} esperados: ${this.cantidad}`
+        `Recibidos: ${this.valoresCicloActual.length}, esperados: ${this.cantidad}`
       );
-    } else {
-      this.finalizarCiclo();
+      this.esperandoRespuesta = false;
+      return; //No llamar finalizarCiclo si está incompleto
     }
 
-    this.ciclosCompletados++;
-
-    if (this.ciclosCompletados >= this.maxCiclosSinReconectar) {
-      console.log("Reconexión preventiva (limpieza de buffers)");
-      this.ciclosCompletados = 0;
-      this.client.destroy();
-      setTimeout(() => this.connect(), 5000);
-      return;
-    }
+    this.finalizarCiclo();
   }
 
   finalizarCiclo() {
     console.log("Ciclo completado ESTATUS:", this.valoresCicloActual);
 
-    const valoresPartidos = this.valoresCicloActual.slice(
-      this.valoresCicloActual.length / 2
-    );
-
-    this.valoresEstatusActual = valoresPartidos[0];
-
-    const estatus = valoresPartidos[0];
-    const produccion = valoresPartidos[1];
-
     // Comparamos con el ciclo anterior
     this.valoresCicloActual.forEach((valor, index) => {
       if (valor !== this.valoresCicloAnterior[index] && valor !== null) {
-        // index + 1 asume que las estaciones son secuenciales.
+        // index + 1 asume que tus estaciones son 1, 2, 3...
         this.sendData(valor, index + 1);
       }
     });
 
-    // Guardamos estado y esperamos para el siguiente ciclo
     this.valoresCicloAnterior = [...this.valoresCicloActual];
+    this.esperandoRespuesta = false;
+    this.ciclosCompletados++;
 
-    this.limpiarTimeOuts();
+    // Reconexión preventiva
+    if (this.ciclosCompletados >= this.maxCiclosSinReconectar) {
+      console.log(`Reconexión preventiva (${this.ciclosCompletados} ciclos)`);
+      this.ciclosCompletados = 0;
+      this.limpiarTimeouts();
+      this.client.destroy();
+      setTimeout(() => this.connect(), 2000);
+      return;
+    }
 
-    // Esperamos 1 segundo y pedimos de nuevo
-    this.cicloTimeOut = setTimeout(() => this.iniciarCiclo(), 2000);
+    this.limpiarTimeouts();
+
+    //Aumentado a 7 segundos (era 2)
+    this.cicloTimeout = setTimeout(() => this.iniciarCiclo(), 2000);
   }
 
-  sendData(codigoColor, idEstacion) {
-    const controller = new AbortController();
-    const timeutId = setTimeout(() => {
-      controller.abort();
-    });
-    fetch("http://localhost:3000/api/estatus/actualizarEstatus", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        color: codigoColor,
-        idLineaProduccion: idEstacion,
-      }),
-      signal: controller.signal,
-    })
-      .then((response) => response.json())
-      .then((data) => console.log(`Estación ${idEstacion} actualizada:`, data))
-      .catch((err) => console.error("Error API:", err));
+  async sendData(codigoColor, idEstacion) {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/estatus/actualizarEstatus",
+        {
+          color: codigoColor,
+          estacion: idEstacion,
+        }
+      );
+
+      console.log(`${tipo.toUpperCase()} E${idEstacion}: ${valor}`);
+    } catch (err) {
+      if (err.code === "ECONNABORTED") {
+        console.error(`${tipo} E${idEstacion}: Timeout`);
+      } else {
+        console.error(`${tipo} E${idEstacion}: ${err.message}`);
+      }
+    }
   }
 }
 
 let clienteActivo = null;
+
 const obtenerEstaciones = async () => {
   try {
     const response = await axios.get(
@@ -221,33 +226,36 @@ const obtenerEstaciones = async () => {
 
     const totalEstaciones = response.data.lineas.length;
 
-    if (totalEstaciones != 0) {
-      if (clienteActivo) {
-        console.log("Reiniciando cliente anterior...");
-        clienteActivo.client.destroy();
-        clienteActivo = null;
-      }
-      console.log(`Iniciando monitoreo de ${totalEstaciones} estaciones.`);
-
-      //Variable inicial
-      const dmInicio = 150;
-
-      // Creamos el cliente con lógica de BLOQUE
-      const PLC = new Client(
-        "192.168.0.10",
-        8501,
-        dmInicio,
-        totalEstaciones * 2
-      );
-      PLC.connect();
-    } else {
-      console.log("No hay lineas de produccion registradas");
+    if (totalEstaciones === 0) {
+      console.log("No hay líneas de producción registradas");
+      return;
     }
+
+    if (clienteActivo) {
+      console.log("Reiniciando cliente anterior...");
+      if (clienteActivo.limpiarTimeouts) {
+        clienteActivo.limpiarTimeouts();
+      }
+      if (clienteActivo.client) {
+        clienteActivo.client.destroy();
+      }
+      clienteActivo = null;
+    }
+
+    console.log(`Iniciando monitoreo de ${totalEstaciones} estaciones`);
+
+    const dmInicio = 150;
+
+    clienteActivo = new Client(
+      "192.168.0.10",
+      8501,
+      dmInicio,
+      totalEstaciones * 2
+    );
+    clienteActivo.connect();
   } catch (e) {
-    console.error("Error inicial:", e);
+    console.error("Error:", e.message);
   }
 };
 
 obtenerEstaciones();
-
-module.exports = { Client, obtenerEstaciones };
