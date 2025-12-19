@@ -259,3 +259,5 @@ const obtenerEstaciones = async () => {
 };
 
 obtenerEstaciones();
+
+module.exports = { Client, obtenerEstaciones };
