@@ -148,7 +148,21 @@ class ClientProduccion {
     this.valoresCicloAnterior = [...this.valoresCicloActual];
 
     // Esperamos 1 segundo y pedimos de nuevo
-    setTimeout(() => this.iniciarCiclo(), 1500);
+    setTimeout(() => this.iniciarCiclo(), 1000);
+  }
+
+  sendData(codigoColor, idEstacion) {
+    fetch("http://localhost:3000/api/estatus/actualizarEstatus", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        color: codigoColor,
+        idLineaProduccion: idEstacion,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => console.log(`Estación ${idEstacion} actualizada:`, data))
+      .catch((err) => console.error("Error API:", err));
   }
 }
 
