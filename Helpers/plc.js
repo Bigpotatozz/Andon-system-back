@@ -189,7 +189,7 @@ const obtenerEstaciones = async () => {
       console.log(`Iniciando monitoreo de ${totalEstaciones} estaciones.`);
 
       //Variable inicial
-      const dmInicio = 100;
+      const dmInicio = 150;
 
       // Creamos el cliente con lógica de BLOQUE
       const PLC = new Client(
