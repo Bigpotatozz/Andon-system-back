@@ -9,22 +9,27 @@ class ClientProduccion {
     // Guardamos qué rango vamos a leer
     this.dmInicial = dmInicial; // Ej: 150
     this.cantidad = cantidad; // Ej: 10 estaciones
-
-    this.client = new net.Socket();
+    this.client = null;
     this.isConnected = false;
     this.buffer = "";
-
     // Arrays de valores
     this.valoresCicloAnterior = new Array(cantidad).fill(null);
     this.valoresCicloActual = [];
+    this.reconnectTimer = null;
   }
 
   connect() {
-    this.client.connect(this.puerto, this.ip);
+    if (this.client) {
+      this.client.removeAllListeners();
+      this.client.destroy();
+    }
+
+    this.client = new net.Socket();
 
     // Mantiene la conexión viva y rápida
     this.client.setKeepAlive(true, 5000);
     this.client.setNoDelay(true);
+    this.client.setTimeout(15000);
 
     this.client.on("connect", () => {
       this.isConnected = true;
@@ -47,17 +52,35 @@ class ClientProduccion {
       }
     });
 
+    this.client.on("timeout", () => {
+      console.log("PLC NO RESPONDE");
+      this.client.end();
+      this.client.destroy();
+    });
+
     this.client.on("error", (err) => {
       console.error(`Error de conexión: ${err.message}`);
       this.isConnected = false;
-      this.reconnect();
+      this.scheduleReconnect();
     });
 
     this.client.on("close", () => {
       console.warn("Conexión cerrada.");
       this.isConnected = false;
-      this.reconnect();
+      this.scheduleReconnect();
     });
+
+    this.client.connect(this.puerto, this.ip);
+  }
+
+  scheduleReconnect() {
+    if (this.reconnectTimer) return;
+    console.log("Restableciendo conexion");
+
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      this.connect();
+    }, 5000);
   }
 
   iniciarCiclo() {
@@ -67,7 +90,15 @@ class ClientProduccion {
     // RDS DM150 10 -> Lee 10 palabras empezando en DM150
     // Formato Keyence: "RDS DM[inicio] -> [cantidad]\r"
     const comando = `RDS DM${this.dmInicial} ${this.cantidad}`;
-    this.client.write(comando + "\r\n");
+
+    try {
+      const flushed = this.client.write(comando + "\r\n");
+      if (!flushed) {
+        console.warn("Buffer de salida lleno (Red lenta?)");
+      }
+    } catch (err) {
+      console.error("Error al escribir:", err.message);
+    }
   }
 
   procesarRespuestaBloque(mensaje) {
@@ -99,7 +130,7 @@ class ClientProduccion {
   }
 
   finalizarCiclo() {
-    console.log("Ciclo completado PRODUCCION:", this.valoresCicloActual);
+    console.log("Ciclo completado ESTATUS:", this.valoresCicloActual);
 
     // Comparamos con el ciclo anterior
     this.valoresCicloActual.forEach((valor, index) => {
@@ -128,15 +159,6 @@ class ClientProduccion {
       .then((response) => response.json())
       .then((data) => console.log(`Estación ${idEstacion} actualizada:`, data))
       .catch((err) => console.error("Error API:", err));
-  }
-
-  reconnect() {
-    setTimeout(() => {
-      console.log("Reintentando conexión...");
-      this.client.destroy();
-      this.client = new net.Socket();
-      this.connect(); // Volvemos a conectar con la misma config
-    }, 5000);
   }
 }
 
