@@ -202,7 +202,10 @@ class Client {
 
   finalizarCiclo() {
     //Recibe e imprime los valores
-    console.log("Ciclo completado ESTATUS:", this.valoresCicloActual);
+    console.log(
+      `Ciclo completado ESTATUS ${Date.now()}:`,
+      this.valoresCicloActual
+    );
 
     // Comparamos con el ciclo anterior
     //Aqui se evalua si hubo diferencias respecto al ciclo anterior
