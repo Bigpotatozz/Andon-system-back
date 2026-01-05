@@ -203,7 +203,7 @@ class Client {
   finalizarCiclo() {
     //Recibe e imprime los valores
     console.log(
-      `Ciclo completado ESTATUS ${Date.now()}:`,
+      `Ciclo completado ESTATUS ${new Date().toLocaleTimeString()}:`,
       this.valoresCicloActual
     );
 
