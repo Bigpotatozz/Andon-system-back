@@ -316,6 +316,7 @@ const obtenerEstatusRatio = async (req, res) => {
 
 const obtenerEstatusTiempos = async (req, res) => {
   try {
+    console.log("Se paso por aqui");
     const queryEstatusTiempos = `SELECT * 
                     FROM estacion 
                     JOIN detalleEstacion ON estacion.idEstacion = detalleEstacion.idEstacion
@@ -341,6 +342,28 @@ const obtenerEstatusTiempos = async (req, res) => {
   }
 };
 
+const obtenerTiemposEstatus = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const query = `SELECT * 
+                    FROM estacion 
+                    JOIN detalleEstacion ON estacion.idEstacion = detalleEstacion.idEstacion
+                    JOIN estatus ON estatus.idEstatus = detalleEstacion.idEstatus
+                    JOIN tiempo ON tiempo.idTiempo = detalleEstacion.idTiempo
+                    WHERE estacion.idEstacion = ?;`;
+
+    const tiempos = await pool.query(query, [id]);
+
+    return res.status(200).send({
+      tiempos: tiempos[0],
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
 const obtenerEstatusModificar = async (req, res) => {
   try {
     const queryEstatus = "select * from estatus where colorId < 1011";
@@ -417,4 +440,5 @@ module.exports = {
   obtenerEstatusTiempos,
   obtenerEstatusModificar,
   modificarEstatus,
+  obtenerTiemposEstatus,
 };
