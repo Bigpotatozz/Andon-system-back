@@ -237,8 +237,7 @@ class Client {
 
     this.limpiarTimeouts();
 
-    //Aumentado a 7 segundos (era 2)
-    this.cicloTimeout = setTimeout(() => this.iniciarCiclo(), 2000);
+    this.cicloTimeout = setTimeout(() => this.iniciarCiclo(), 1000);
   }
 
   async sendData(codigoColor, idEstacion) {
