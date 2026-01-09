@@ -292,7 +292,7 @@ const obtenerEstaciones = async () => {
     }
 
     const dmInicio = 100;
-    const cantidadVariables = totalEstaciones * 2;
+    const cantidadVariables = totalEstaciones;
 
     if (clienteActivo) {
       if (clienteActivo.cantidad === cantidadVariables) {
