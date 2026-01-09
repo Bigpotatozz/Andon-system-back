@@ -291,7 +291,7 @@ const obtenerEstaciones = async () => {
       return;
     }
 
-    const dmInicio = 150;
+    const dmInicio = 100;
     const cantidadVariables = totalEstaciones * 2;
 
     if (clienteActivo) {
@@ -325,7 +325,7 @@ const obtenerEstaciones = async () => {
 
     // Solo llega aquí si NO existe cliente o si la cantidad cambió
     console.log(
-      `🚀 Iniciando monitoreo de ${totalEstaciones} estaciones (${cantidadVariables} variables)`
+      `Iniciando monitoreo de ${totalEstaciones} estaciones (${cantidadVariables} variables)`
     );
     clienteActivo = new Client(
       "192.168.0.10",
