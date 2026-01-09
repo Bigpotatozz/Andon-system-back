@@ -250,7 +250,7 @@ class Client {
         }
       );
 
-      console.log(`${tipo.toUpperCase()} E${idEstacion}: ${valor}`);
+      console.log(`ACTUALIZADO E${idEstacion}: ${codigoColor}`);
     } catch (err) {
       if (err.code === "ECONNABORTED") {
         console.error(`$E${idEstacion}: Timeout`);
@@ -292,7 +292,7 @@ const obtenerEstaciones = async () => {
     }
 
     const dmInicio = 100;
-    const cantidadVariables = totalEstaciones;
+    const cantidadVariables = totalEstaciones; //cantidadVariables * 2;
 
     if (clienteActivo) {
       if (clienteActivo.cantidad === cantidadVariables) {
