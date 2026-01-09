@@ -133,9 +133,6 @@ const actualizarEstatus = async (req, res) => {
       idLineaProduccion,
     ]);
 
-    console.log(detalleestatus[0][0]);
-    console.log(lineaProduccion[0][0]);
-
     //Une todas las tablas para su visualizacion general
     if (lineaProduccion[0][0].estatusActual != 0) {
       const oldLineaQuery = `select * from estacion 
@@ -147,8 +144,6 @@ const actualizarEstatus = async (req, res) => {
       const lineaProduccionAntigua = await pool.query(oldLineaQuery, [
         idLineaProduccion,
       ]);
-
-      console.log(lineaProduccionAntigua);
 
       //Actualiza el tiempo al tiempo en caso de que hubiera otro anteriormente
       const cerrarTiempoQuery = `update tiempo set final = NOW(), total = COALESCE(total, 0) + TIMESTAMPDIFF(SECOND, inicio, NOW()), contador = ? where idTiempo = ?;`;
