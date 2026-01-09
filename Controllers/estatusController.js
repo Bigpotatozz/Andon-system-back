@@ -114,7 +114,6 @@ const actualizarEstatus = async (req, res) => {
   try {
     //Accede al body
     const { color, idLineaProduccion } = req.body;
-    console.log(color, idLineaProduccion);
 
     //Obtiene el detalleProduccion de esa linea
     const queryObtenerIdEstatus = `select * from detalleEstacion as dl
@@ -417,9 +416,10 @@ where estacion.idEstacion = detalleEstacion.idEstacion;`;
 
   const response = await pool.query(query);
 
-  console.log("////////////////////////////////////////////////////");
-  console.log(response[0]);
-  console.log("////////////////////////////////////////////////////");
+  //Activar en caso de errores
+  //console.log("////////////////////////////////////////////////////");
+  //console.log(response[0]);
+  //console.log("////////////////////////////////////////////////////");
   socket.emit("obtenerEstatus", response[0]);
 };
 
