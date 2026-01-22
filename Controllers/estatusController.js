@@ -390,7 +390,7 @@ const modificarEstatus = async (req, res) => {
 
     for (let id of ids) {
       const modificarEstatus = await pool.query(queryModificarEstatus, [
-        id.peso,
+        id.prioridad,
         id.idEstatus,
       ]);
     }
