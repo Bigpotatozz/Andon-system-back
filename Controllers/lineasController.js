@@ -6,7 +6,7 @@ const { obtenerEstacionesProduccion } = require("../Helpers/plc_estatus");
 //Crea una nueva linea de produccion
 const crearLinea = async (req, res) => {
   //accede la informacion del body
-  const { estaciones, turnos } = req.body;
+  const { nombreLinea, estaciones, turnos } = req.body;
   //Instancia la transaccion
   const connection = await pool.getConnection();
 
@@ -22,7 +22,7 @@ const crearLinea = async (req, res) => {
       "INSERT INTO lineaproduccion(nombre) values (?)";
     const insertarLineaProduccion = await connection.query(
       insertarLineaProduccionQuery,
-      ["Linea de produccion"]
+      [nombreLinea],
     );
 
     //OBTIENE EL ID DE LA LINEA DE PRODUCCION QUE SE ACABA DE INSERTAR
@@ -64,7 +64,7 @@ const crearLinea = async (req, res) => {
         "INSERT INTO estacion(nombre, estatusActual, idLineaProduccion) values(?,?,?)";
       const insertarEstaciones = await connection.query(
         insertarEstacionesQuery,
-        [estacion, 0, idLineaProduccion]
+        [estacion, 0, idLineaProduccion],
       );
 
       //se pushea al arreglo los ids previamente insertados, para retornarlos al frontend
@@ -123,7 +123,7 @@ const verificarExistenciaLinea = async (req, res) => {
 const obtenerLineasRegistradas = async (req, res) => {
   try {
     //Consulta para obtener las estaciones
-    const query = `Select idEstacion, nombre,progreso from estacion;`;
+    const query = `Select idEstacion, nombre, progreso, idLineaProduccion from estacion;`;
     const response = await pool.query(query);
 
     //Devuelve las estaciones
