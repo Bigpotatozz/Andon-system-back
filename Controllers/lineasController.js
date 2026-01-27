@@ -253,6 +253,72 @@ const iniciarPLC = async (req, res) => {
   }
 };
 
+const obtenerEstacionesPorLinea = async (req, res) => {
+  const { idLineaProduccion } = req.params;
+  try {
+    const queryEstaciones = `SELECT * FROM estacion WHERE idLineaProduccion = ?;`;
+    const estaciones = await pool.query(queryEstaciones, [idLineaProduccion]);
+
+    return res.status(200).send({
+      estaciones: estaciones[0],
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+const verTiemposLinea = async (req, res) => {
+  const { idLineaProduccion } = req.params;
+  try {
+    const queryEstatus = `SELECT * FROM estacion WHERE idLineaProduccion = ?`;
+
+    const estaciones = await pool.query(queryEstatus, [idLineaProduccion]);
+
+    let tiempos = [];
+    for (let estacion of estaciones[0]) {
+      const queryDetalle = `SELECT * FROM detalleestacion WHERE idEstacion = ?;`;
+      const detalle = await pool.query(queryDetalle, [estacion.idEstacion]);
+
+      for (let tiempo of detalle[0]) {
+        const queryTiempo = `SELECT * FROM tiempo WHERE idTiempo = ?;`;
+
+        const tiemposBD = await pool.query(queryTiempo, [tiempo.idTiempo]);
+
+        tiempos.push(tiemposBD[0]);
+      }
+    }
+
+    return res.status(200).send({
+      tiempos: tiempos,
+    });
+  } catch (e) {
+    console.log(e);
+
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
+const obtenerLineasProudccion = async (req, res) => {
+  try {
+    const queryLineas = `SELECT * FROM lineaproduccion;`;
+
+    const lineasProduccion = await pool.query(queryLineas);
+
+    return res.status(200).send({
+      lineas: lineasProduccion[0],
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
 const socketObtenerEstaciones = async (socket) => {
   const socketQuery = `Select idEstacion, nombre,progreso from estacion;`;
 
@@ -281,4 +347,7 @@ module.exports = {
   registrarIps,
   socketObtenerEstaciones,
   iniciarPLC,
+  verTiemposLinea,
+  obtenerLineasProudccion,
+  obtenerEstacionesPorLinea,
 };

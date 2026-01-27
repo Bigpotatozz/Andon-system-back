@@ -7,6 +7,9 @@ const {
   obtenerEstacionesTiempos,
   registrarIps,
   iniciarPLC,
+  verTiemposLinea,
+  obtenerLineasProudccion,
+  obtenerEstacionesPorLinea,
 } = require("../Controllers/lineasController");
 
 //Rutas de las lineas de produccion
@@ -18,11 +21,19 @@ lineaRouter.get("/obtenerLineasRegistradas", obtenerLineasRegistradas);
 lineaRouter.put("/actualizarProductionRatio", actualizarProductionRatio);
 lineaRouter.get(
   "/obtenerEstacionesTiempos/:idEstacion",
-  obtenerEstacionesTiempos
+  obtenerEstacionesTiempos,
 );
 
 lineaRouter.put("/registrarIp", registrarIps);
 
 lineaRouter.get("/iniciarPLC", iniciarPLC);
 
+lineaRouter.get("/verTiempos/:idLineaProduccion", verTiemposLinea);
+
+lineaRouter.get("/", obtenerLineasProudccion);
+
+lineaRouter.get(
+  "/obtenerEstacionesPorLinea/:idLineaProduccion",
+  obtenerEstacionesPorLinea,
+);
 module.exports = { lineaRouter };
