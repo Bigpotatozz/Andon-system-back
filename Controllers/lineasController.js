@@ -319,6 +319,58 @@ const obtenerLineasProudccion = async (req, res) => {
   }
 };
 
+const obtenerTiemposPorLinea = async (req, res) => {
+  const { idLineaProduccion } = req.params;
+  try {
+    const queryTiempos = `
+                          select 
+                          lp.idLineaProduccion, lp.nombre,
+                          e.idEstacion, e.nombre as nombreEstacion, e.estatusActual, e.progreso,
+                          de.idDetalleEstacion, de.idEstatus, de.idEstacion, de.idTiempo,
+                          est.idEstatus, est.nombre, est.prioridad, est.color, est.colorId, est.cancion, est.tiempoDefinido, 
+                          est.activo, temp.idTiempo, temp.fecha, temp.inicio, temp.final, temp.total, temp.contador
+                          from lineaProduccion as lp
+                          inner join estacion as e on e.idLineaProduccion = lp.idLineaProduccion
+                          inner join detalleestacion as de on de.idEstacion = e.idEstacion 
+                          inner join estatus as est on est.idEstatus = de.idEstatus
+                          inner join tiempo as temp on temp.idTiempo = de.idTiempo
+                          where lp.idLineaProduccion = ?;`;
+
+    const tiempos = await pool.query(queryTiempos, [idLineaProduccion]);
+
+    return res.status(200).send({
+      tiempos: tiempos[0],
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
+const obtenerTiemposPorEstacion = async (req, res) => {
+  const { idEstacion } = req.params;
+  try {
+    const queryTiempos = `
+                          select * from detalleestacion as de
+                          inner join tiempo on de.idTiempo = tiempo.idTiempo
+                          inner join estatus on de.idEstatus = estatus.idEstatus
+                          where idEstacion = ?;`;
+
+    const tiempos = await pool.query(queryTiempos, [idEstacion]);
+
+    return res.status(200).send({
+      tiempos: tiempos[0],
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
 const socketObtenerEstaciones = async (socket) => {
   const socketQuery = `Select idEstacion, nombre,progreso from estacion;`;
 
@@ -350,4 +402,6 @@ module.exports = {
   verTiemposLinea,
   obtenerLineasProudccion,
   obtenerEstacionesPorLinea,
+  obtenerTiemposPorLinea,
+  obtenerTiemposPorEstacion,
 };
