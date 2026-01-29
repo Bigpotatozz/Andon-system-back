@@ -172,7 +172,9 @@ const actualizarEstatus = async (req, res) => {
       message: detalleestatus[0],
     });
 
-    setImmediate(() => socketObtenerEstatus(io));
+    setImmediate(() => {
+      socketObtenerEstatus(io);
+    });
   } catch (e) {
     //Devuelve un error como respuesta
     console.log(e);
@@ -407,8 +409,9 @@ const modificarEstatus = async (req, res) => {
 };
 
 const socketObtenerEstatus = async (socket) => {
-  const query = `select estacion.nombre AS nombreEstacion, estacion.idEstacion, estacion.estatusActual, detalleEstacion.*, estatus.*, tiempo.* 
+  const query = `select lineaproduccion.idLineaProduccion, estacion.nombre AS nombreEstacion, estacion.idEstacion, estacion.estatusActual, detalleEstacion.*, estatus.*, tiempo.* 
 from estacion 
+join lineaproduccion on lineaproduccion.idLineaProduccion = estacion.idLineaProduccion
 join detalleEstacion on detalleEstacion.idEstatus = estacion.estatusActual
 join estatus on estatus.idEstatus = detalleEstacion.idEstatus
 join tiempo on tiempo.idTiempo = detalleEstacion.idTiempo
