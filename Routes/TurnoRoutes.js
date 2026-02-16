@@ -4,6 +4,7 @@ const {
   actualizarProgresoProduccion,
   obtenerTurno,
   resetearProgresoProduccionHora,
+  obtenerTurnos,
 } = require("../Controllers/productionController");
 
 const turnoRouter = Router();
@@ -15,7 +16,9 @@ turnoRouter.get("/obtenerTurno", obtenerTurno);
 
 turnoRouter.put(
   "/resetearProgresoProduccionHora/:turno",
-  resetearProgresoProduccionHora
+  resetearProgresoProduccionHora,
 );
+
+turnoRouter.get("/obtenerTurnos", obtenerTurnos);
 
 module.exports = { turnoRouter };

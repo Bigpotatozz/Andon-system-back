@@ -99,6 +99,32 @@ const resetearProgresoProduccionHora = async (req, res) => {
   }
 };
 
+const obtenerTurnos = async (req, res) => {
+  try {
+    const query = `SELECT * FROM turno`;
+
+    const turnos = await pool.query(query);
+
+    for (let turno of turnos[0]) {
+      const queryLineaProduccion = `SELECT * FROM lineaProduccion WHERE idLineaProduccion = ?`;
+      const lineaProduccion = await pool.query(queryLineaProduccion, [
+        turno.idLineaProduccion,
+      ]);
+      turno.lineaProduccion = lineaProduccion[0];
+    }
+
+    return res.status(200).send({
+      turnos: turnos[0],
+    });
+  } catch (e) {
+    console.log(e);
+
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
 const socketObtenerTurno = async (socket) => {
   const socketQuery = `
                                 SELECT * 
@@ -134,4 +160,5 @@ module.exports = {
   obtenerTurno,
   socketObtenerTurno,
   resetearProgresoProduccionHora,
+  obtenerTurnos,
 };
