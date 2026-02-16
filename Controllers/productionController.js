@@ -101,20 +101,18 @@ const resetearProgresoProduccionHora = async (req, res) => {
 
 const obtenerTurnos = async (req, res) => {
   try {
-    const query = `SELECT * FROM turno`;
+    const query = `SELECT * FROM lineaProduccion`;
 
-    const turnos = await pool.query(query);
+    const lineas = await pool.query(query);
 
-    for (let turno of turnos[0]) {
-      const queryLineaProduccion = `SELECT * FROM lineaProduccion WHERE idLineaProduccion = ?`;
-      const lineaProduccion = await pool.query(queryLineaProduccion, [
-        turno.idLineaProduccion,
-      ]);
-      turno.lineaProduccion = lineaProduccion[0];
+    for (let linea of lineas[0]) {
+      const queryTurno = `SELECT * FROM turno WHERE idLineaProduccion = ?`;
+      const turno = await pool.query(queryTurno, [linea.idLineaProduccion]);
+      linea.turno = turno[0];
     }
 
     return res.status(200).send({
-      turnos: turnos[0],
+      lineas: lineas[0],
     });
   } catch (e) {
     console.log(e);
