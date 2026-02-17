@@ -5,7 +5,6 @@ const {
   obtenerLineasRegistradas,
   actualizarProductionRatio,
   obtenerEstacionesTiempos,
-  registrarIps,
   iniciarPLC,
   obtenerEstacionesPorLinea,
   verTiemposLinea,
@@ -19,15 +18,17 @@ const {
 const lineaRouter = Router();
 //Registra nuevas lineas de produccion
 lineaRouter.post("/crearLinea", crearLinea);
+//Verifica la existencia de una estacion
 lineaRouter.get("/verificarExistenciaLinea/:idLinea", verificarExistenciaLinea);
+//Obtiene todas las estaciones registradas
 lineaRouter.get("/obtenerLineasRegistradas", obtenerLineasRegistradas);
+//Actualiza el production ratio de una linea
 lineaRouter.put("/actualizarProductionRatio", actualizarProductionRatio);
+//Obtiene los tiempos de las estaciones
 lineaRouter.get(
   "/obtenerEstacionesTiempos/:idEstacion",
   obtenerEstacionesTiempos,
 );
-
-lineaRouter.put("/registrarIp", registrarIps);
 
 lineaRouter.get("/iniciarPLC", iniciarPLC);
 
