@@ -29,20 +29,24 @@ lineaRouter.get(
   "/obtenerEstacionesTiempos/:idEstacion",
   obtenerEstacionesTiempos,
 );
-
+//Inicia el script del PLC
 lineaRouter.get("/iniciarPLC", iniciarPLC);
 
+//Obtiene las estaciones por linea de produccion
 lineaRouter.get(
   "/obtenerEstacionesPorLinea/:idLineaProduccion",
   obtenerEstacionesPorLinea,
 );
+//Obtiene los tiempos de las estaciones de una linea de produccion
 lineaRouter.get("/verTiempos/:idLineaProduccion", verTiemposLinea);
-
+//Obtiene todas las lineas de produccion
 lineaRouter.get("/", obtenerLineasProudccion);
-
+//Obtiene los tiempos de las estaciones por linea de produccion
 lineaRouter.get("/tiemposPorLinea/:idLineaProduccion", obtenerTiemposPorLinea);
 
+//Obtiene los tiempos de una estacion en especifico
 lineaRouter.get("/tiemposPorEstacion/:idEstacion", obtenerTiemposPorEstacion);
-
+//Crear linea de produccion (SOLO VERSION MULTILINE)
 lineaRouter.post("/crearLinea2", crearLinea2);
+//Exportacion del router
 module.exports = { lineaRouter };
