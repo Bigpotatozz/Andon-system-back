@@ -502,7 +502,6 @@ module.exports = {
   obtenerLineasRegistradas,
   actualizarProductionRatio,
   obtenerEstacionesTiempos,
-  registrarIps,
   socketObtenerEstaciones,
   iniciarPLC,
   verTiemposLinea,
