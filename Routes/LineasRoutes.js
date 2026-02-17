@@ -12,6 +12,7 @@ const {
   obtenerLineasProudccion,
   obtenerTiemposPorLinea,
   obtenerTiemposPorEstacion,
+  crearLinea2,
 } = require("../Controllers/lineasController");
 
 //Rutas de las lineas de produccion
@@ -41,4 +42,6 @@ lineaRouter.get("/", obtenerLineasProudccion);
 lineaRouter.get("/tiemposPorLinea/:idLineaProduccion", obtenerTiemposPorLinea);
 
 lineaRouter.get("/tiemposPorEstacion/:idEstacion", obtenerTiemposPorEstacion);
+
+lineaRouter.post("/crearLinea2", crearLinea2);
 module.exports = { lineaRouter };
