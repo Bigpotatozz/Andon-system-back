@@ -247,16 +247,21 @@ const obtenerEstatusEspecifico = async (req, res) => {
   }
 };
 
+//Obtiene y manda los estatus de production ratio (PRODUCCION, PQ TIME, DESCANSO, ETC)
 const obtenerEstatusProductionRatio = async (req, res) => {
   try {
+    //Selecciona los estatus registrados
     const queryObtener = `SELECT * FROM estatus`;
     const response = await pool.query(queryObtener);
 
+    //Arreglo para guardar estatus
     const estatus = [];
+    //Recorre el arreglo y agrega los estatus que esten entre 1011 y 1014
     response[0].forEach((e) => {
       if (e.colorId >= 1011 && e.colorId <= 1014) estatus.push(e);
     });
 
+    //Devuelve los estatus
     return res.status(200).send({
       response: estatus,
     });
@@ -267,16 +272,21 @@ const obtenerEstatusProductionRatio = async (req, res) => {
   }
 };
 
+//Activa uno de los estatus de production ratio
 const activarEstatus = async (req, res) => {
+  //Obtiene el colorId del body
   const { colorId } = req.body;
   try {
+    //Desactiva si hay algun otro estatus activo
     const desactivarEstatusQuery = `UPDATE estatus set activo = false where colorId != ?`;
     const desactivarEstatus = await pool.query(desactivarEstatusQuery, [
       colorId,
     ]);
+    //Activa el nuevo estatus
     const activarEstatusQuery = `UPDATE estatus set activo = true where colorId = ?`;
     const activarEstatus = await pool.query(activarEstatusQuery, [colorId]);
 
+    //Envia una respuesta exitosa
     return res.status(200).send({
       message: "Estatus activado",
     });
@@ -288,17 +298,21 @@ const activarEstatus = async (req, res) => {
   }
 };
 
+//Obtener el estatus activo de production ratio
 const obtenerEstatusRatio = async (req, res) => {
   try {
+    //Obtiene el estatus que esta en true
     const estatusRatioQuery = "select * from estatus where activo = true";
     const estatusRatio = await pool.query(estatusRatioQuery);
 
+    //Si no hay ningun en true devuelve que no hay ninguno activo
     if (!estatusRatio) {
       return res.status(404).send({
         message: "No hay estatus activos",
       });
     }
 
+    //Si hay uno activo lo devuelve
     return res.status(200).send({
       response: estatusRatio[0],
     });
@@ -310,24 +324,26 @@ const obtenerEstatusRatio = async (req, res) => {
   }
 };
 
+//Obtiene los tiempos de cada estatus
 const obtenerEstatusTiempos = async (req, res) => {
   try {
-    console.log("Se paso por aqui");
+    //Obtiene los estatus con sus respectivos tiempos
     const queryEstatusTiempos = `SELECT * 
                     FROM estacion 
                     JOIN detalleEstacion ON estacion.idEstacion = detalleEstacion.idEstacion
                     JOIN estatus ON estatus.idEstatus = detalleEstacion.idEstatus
                     JOIN tiempo ON tiempo.idTiempo = detalleEstacion.idTiempo
                     ORDER BY estacion.idEstacion;`;
-
     const tiempos = await pool.query(queryEstatusTiempos);
 
+    //Si no hay ningun estatus registrado devuelve el error
     if (tiempos[0].length <= 0) {
       return res.status(404).send({
         message: "No hay estatus activos",
       });
     }
 
+    //Devuelve los estatus
     return res.status(200).send({
       tiempos: tiempos[0],
     });
@@ -338,18 +354,21 @@ const obtenerEstatusTiempos = async (req, res) => {
   }
 };
 
+//Obtiene los tiempos de una sola estacion
 const obtenerTiemposEstatus = async (req, res) => {
+  //Accede al id
   const { id } = req.params;
   try {
+    //Busca los estatus de esa estacion y une los tiempos correspondientes
     const query = `SELECT * 
                     FROM estacion 
                     JOIN detalleEstacion ON estacion.idEstacion = detalleEstacion.idEstacion
                     JOIN estatus ON estatus.idEstatus = detalleEstacion.idEstatus
                     JOIN tiempo ON tiempo.idTiempo = detalleEstacion.idTiempo
                     WHERE estacion.idEstacion = ?;`;
-
     const tiempos = await pool.query(query, [id]);
 
+    //Devuelve la informacion
     return res.status(200).send({
       tiempos: tiempos[0],
     });
@@ -360,17 +379,23 @@ const obtenerTiemposEstatus = async (req, res) => {
     });
   }
 };
+
+//Obtiene los estatus del 1000 al 1010
 const obtenerEstatusModificar = async (req, res) => {
   try {
+    //Obtiene los estatus del 1000 al 1010
+    // Del 1011 en adelante son estatus de production ratio
     const queryEstatus = "select * from estatus where colorId < 1011";
     const estatus = await pool.query(queryEstatus);
 
+    //Si no hay estatus que cumplan con la condicion devuelve el error
     if (estatus[0].length <= 0) {
       return res.status(404).send({
         message: "No hay estatus activos",
       });
     }
 
+    //Devuelve la informacion
     return res.status(200).send({
       estatus: estatus[0],
     });
@@ -382,14 +407,17 @@ const obtenerEstatusModificar = async (req, res) => {
   }
 };
 
+//Modifica la prioridad de de los estatus indicados
 const modificarEstatus = async (req, res) => {
+  //Accede a los ids de los estatus que vienen en el body
   const { ids } = req.body;
-
   console.log(ids);
   try {
+    //Query para hacer la modificacion de la prioridad
     const queryModificarEstatus =
       "update estatus set prioridad = ? where idEstatus = ?";
 
+    //Recorre cada uno de los ids y ejecuta la query
     for (let id of ids) {
       const modificarEstatus = await pool.query(queryModificarEstatus, [
         id.prioridad,
@@ -397,6 +425,7 @@ const modificarEstatus = async (req, res) => {
       ]);
     }
 
+    //Devuelve la respuesta exitosa
     return res.status(200).send({
       message: "Estatus modificado correctamente",
     });
@@ -408,7 +437,9 @@ const modificarEstatus = async (req, res) => {
   }
 };
 
+//Socket para reflejar los cambios de estatus en las estaciones
 const socketObtenerEstatus = async (socket) => {
+  //Query para obtener la informacions
   const query = `select lineaproduccion.idLineaProduccion, estacion.nombre AS nombreEstacion, estacion.idEstacion, estacion.estatusActual, detalleEstacion.*, estatus.*, tiempo.* 
 from estacion 
 join lineaproduccion on lineaproduccion.idLineaProduccion = estacion.idLineaProduccion
@@ -417,12 +448,15 @@ join estatus on estatus.idEstatus = detalleEstacion.idEstatus
 join tiempo on tiempo.idTiempo = detalleEstacion.idTiempo
 where estacion.idEstacion = detalleEstacion.idEstacion;`;
 
+  //Ejecuta la query
   const response = await pool.query(query);
 
   //Activar en caso de errores
   //console.log("////////////////////////////////////////////////////");
   //console.log(response[0]);
   //console.log("////////////////////////////////////////////////////");
+
+  //Emite el cambio al cliente
   socket.emit("obtenerEstatus", response[0]);
 };
 
