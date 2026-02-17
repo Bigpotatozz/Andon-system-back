@@ -1,3 +1,4 @@
+//Verifica que una estacion exista
 const verificarExistenciaEstacion = async (req, res) => {
   //Accede a los params
   const { idLinea } = req.params;
