@@ -88,6 +88,7 @@ const crearLinea = async (req, res) => {
   }
 };
 
+//Endpoint para creacion de Linea de produccion en modelo MultiLine
 const crearLinea2 = async (req, res) => {
   //accede la informacion del body
   const { linea, estaciones, turnos } = req.body;
