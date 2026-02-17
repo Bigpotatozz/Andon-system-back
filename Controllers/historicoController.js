@@ -1,5 +1,6 @@
 const { pool } = require("../Config/connection");
 
+//Inserta el tiempo en historico y resetea la tabla tiempo original
 const reset = async (req, res) => {
   try {
     //INSERCION EN TABLA DE TIEMPO HISTORICO
@@ -29,6 +30,7 @@ const reset = async (req, res) => {
   }
 };
 
+//Elimina toda la base de datos
 const deleteAll = async (req, res) => {
   try {
     const queryBorrar = "call drop_db_procedure();";
