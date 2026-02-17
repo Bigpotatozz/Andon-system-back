@@ -5,6 +5,7 @@ const {
 
 const estaciones_router = Router();
 
+//Ruta que verifica la existencia de una estacion
 estaciones_router.get(
   "/verificarExistenciaEstacion/:idEstacion",
   verificarExistenciaEstacion,
