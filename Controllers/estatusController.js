@@ -441,12 +441,12 @@ const modificarEstatus = async (req, res) => {
 const socketObtenerEstatus = async (socket) => {
   //Query para obtener la informacions
   const query = `select lineaproduccion.idLineaProduccion, estacion.nombre AS nombreEstacion, estacion.idEstacion, estacion.estatusActual, detalleEstacion.*, estatus.*, tiempo.* 
-from estacion 
-join lineaproduccion on lineaproduccion.idLineaProduccion = estacion.idLineaProduccion
-join detalleEstacion on detalleEstacion.idEstatus = estacion.estatusActual
-join estatus on estatus.idEstatus = detalleEstacion.idEstatus
-join tiempo on tiempo.idTiempo = detalleEstacion.idTiempo
-where estacion.idEstacion = detalleEstacion.idEstacion;`;
+                  from estacion 
+                  join lineaproduccion on lineaproduccion.idLineaProduccion = estacion.idLineaProduccion
+                  join detalleEstacion on detalleEstacion.idEstatus = estacion.estatusActual
+                  join estatus on estatus.idEstatus = detalleEstacion.idEstatus
+                  join tiempo on tiempo.idTiempo = detalleEstacion.idTiempo
+                  where estacion.idEstacion = detalleEstacion.idEstacion;`;
 
   //Ejecuta la query
   const response = await pool.query(query);

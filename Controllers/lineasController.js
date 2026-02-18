@@ -4,7 +4,7 @@ const { obtenerIps, obtenerEstaciones } = require("../Helpers/plc");
 const { obtenerEstacionesProduccion } = require("../Helpers/plc_estatus");
 const { calcularHoras } = require("../Helpers/calcularDifHoras");
 
-//Crea una nueva linea de produccion
+//Crea una nueva linea de produccion (VERSION SINGLE LINE)
 const crearLinea = async (req, res) => {
   //accede la informacion del body
   const { nombreLinea, estaciones, turnos } = req.body;
@@ -42,9 +42,9 @@ const crearLinea = async (req, res) => {
         idLineaProduccion,
       ]);
 
+      //INSERTA LOS OBJETIVOS CORRESPONDIENTES A CADA TURNO (VERISION SINGLE LINE)
       const insertarObjetivosQuery = `insert into objetivo(objetivoProduccionHora, objetivoProduccion, progresoProduccion, activo, idTurno)
       VALUES (?,?,?,?,?)`;
-
       const insertarObjetivos = await connection.query(insertarObjetivosQuery, [
         0,
         0,
@@ -89,7 +89,7 @@ const crearLinea = async (req, res) => {
   }
 };
 
-//Endpoint para creacion de Linea de produccion en modelo MultiLine
+//Endpoint para creacion de Linea de produccion (VERSION MULTILINE)
 const crearLinea2 = async (req, res) => {
   //accede la informacion del body
   const { linea, estaciones, turnos } = req.body;
@@ -127,11 +127,13 @@ const crearLinea2 = async (req, res) => {
         idLineaProduccion,
       ]);
 
+      //INSERTA LOS OBJETIVOS CORRESPONDIENTES A CADA TURNO (VERSION MULTILINE)
       const insertarObjetivosQuery = `insert into objetivo(objetivoProduccionHora, objetivoProduccion, progresoProduccion, progresoProduccionHora,activo, idTurno)
       VALUES (?,?,?,?,?,?)`;
 
       const horasTurno = calcularHoras(turno.horaInicio, turno.horaFin);
 
+      //CALCULA EL OBJETIVO POR HORA Y EL OBJETIVO TOTAL
       const objetivoProduccionHora = 3600 / linea.cicleTime;
       const objetivoProduccion = objetivoProduccionHora * horasTurno;
       const insertarObjetivos = await connection.query(insertarObjetivosQuery, [
