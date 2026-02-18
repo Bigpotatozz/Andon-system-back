@@ -2,6 +2,7 @@ const { query } = require("express-validator");
 const { pool } = require("../Config/connection");
 const { obtenerIps, obtenerEstaciones } = require("../Helpers/plc");
 const { obtenerEstacionesProduccion } = require("../Helpers/plc_estatus");
+const { calcularHoras } = require("../Helpers/calcularDifHoras");
 
 //Crea una nueva linea de produccion
 const crearLinea = async (req, res) => {
@@ -126,11 +127,16 @@ const crearLinea2 = async (req, res) => {
         idLineaProduccion,
       ]);
 
-      const insertarObjetivosQuery = `insert into objetivo(objetivoProduccionHora, objetivoProduccion, progresoProduccion, activo, idTurno)
-      VALUES (?,?,?,?,?)`;
+      const insertarObjetivosQuery = `insert into objetivo(objetivoProduccionHora, objetivoProduccion, progresoProduccion, progresoProduccionHora,activo, idTurno)
+      VALUES (?,?,?,?,?,?)`;
 
+      const horasTurno = calcularHoras(turno.horaInicio, turno.horaFin);
+
+      const objetivoProduccionHora = 3600 / linea.cicleTime;
+      const objetivoProduccion = objetivoProduccionHora * horasTurno;
       const insertarObjetivos = await connection.query(insertarObjetivosQuery, [
-        0,
+        objetivoProduccionHora,
+        objetivoProduccion,
         0,
         0,
         true,
