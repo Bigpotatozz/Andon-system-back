@@ -135,7 +135,6 @@ const obtenerTurnos = async (req, res) => {
 //Socket para obtener los turnos en caso de cambio (en base a la hora)
 const socketObtenerTurno = async (socket) => {
   //Query que obtiene el turno en base a la hora actual
-  //En caso de detectar el cambio emite el evento al cliente
   const socketQuery = `
                                 SELECT * 
                                 FROM turno
@@ -152,7 +151,6 @@ const socketObtenerTurno = async (socket) => {
     try {
       //Ejecuta la query
       const response = await pool.query(socketQuery);
-
       //Emite el cambio al cliente
       socket.emit("obtenerTurno", response[0]);
     } catch (e) {
