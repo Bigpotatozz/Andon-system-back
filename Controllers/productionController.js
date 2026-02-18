@@ -32,6 +32,58 @@ const obtenerProductionRatio = async (req, res) => {
   }
 };
 
+const actualizarProgresoProduccionMultiLinea = async (req, res) => {
+  const { idLineaProduccion } = req.params;
+  try {
+    //Se accede al turno en base a la hora
+    const queryTurno = `SELECT * 
+                                FROM turno
+                                inner join objetivo on objetivo.idTurno = turno.idTurno
+                                WHERE (
+                                  (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
+                                  OR
+                                  (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
+                                )
+                                AND idLineaProduccion = ?
+                                LIMIT 1`;
+    const turno = await pool.query(queryTurno, [idLineaProduccion]);
+    console.log(turno[0][0]);
+
+    if (turno[0][0].progresoProduccion <= 0) {
+      let fechaPrimeraPieza = new Date();
+      const query =
+        "update objetivo set progresoProduccion = progresoProduccion + 1, progresoProduccionHora = progresoProduccionHora + 1, primerPieza = ? where idTurno = ?";
+      const response = await pool.query(query, [
+        fechaPrimeraPieza,
+        turno[0][0].idTurno,
+      ]);
+    }
+
+    let fechaUltimaPieza = new Date();
+    //Una vez teniendo el turno se aumenta 1 al progreso de produccion correspondiente al turno
+    const query =
+      "update objetivo set fecha = ?, progresoProduccion = progresoProduccion + 1, progresoProduccionHora = progresoProduccionHora + 1, ultimaPieza = ?, OEE = ? where idTurno = ?";
+    const response = await pool.query(query, [
+      new Date(),
+      fechaUltimaPieza,
+      ((turno[0][0].progresoProduccion + 1) /
+        turno[0][0].objetivoProduccionHora) *
+        100,
+      turno[0][0].idTurno,
+    ]);
+
+    //Devuelve un estatus exitoso
+    return res.status(200).send({
+      message: "Progreso actualizado",
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
 //Actualizar el progreso de produccion (+1)
 const actualizarProgresoProduccion = async (req, res) => {
   try {
@@ -191,4 +243,5 @@ module.exports = {
   socketObtenerTurno,
   resetearProgresoProduccionHora,
   obtenerTurnos,
+  actualizarProgresoProduccionMultiLinea,
 };

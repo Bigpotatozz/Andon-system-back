@@ -5,6 +5,7 @@ const {
   obtenerTurno,
   resetearProgresoProduccionHora,
   obtenerTurnos,
+  actualizarProgresoProduccionMultiLinea,
 } = require("../Controllers/productionController");
 
 const turnoRouter = Router();
@@ -14,6 +15,11 @@ turnoRouter.get("/obtenerProductionRatio/:idTurno", obtenerProductionRatio);
 
 //Actualiza el progreso de produccion
 turnoRouter.post("/actualizarProgresoProduccion", actualizarProgresoProduccion);
+//Actualiza el progreso de produccion en base a la linea de produccion
+turnoRouter.post(
+  "/actualizarProgresoProduccionMultiLinea/:idLineaProduccion",
+  actualizarProgresoProduccionMultiLinea,
+);
 //Obtiene un turno en especifico
 turnoRouter.get("/obtenerTurno", obtenerTurno);
 //Resetea el progreso de produccion
