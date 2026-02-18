@@ -38,6 +38,7 @@ const actualizarProgresoProduccion = async (req, res) => {
     //Se accede al turno en base a la hora
     const queryTurno = `SELECT * 
                                 FROM turno
+                                inner join objetivo on objetivo.idTurno = turno.idTurno
                                 WHERE (
                                   (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
                                   OR
@@ -47,16 +48,35 @@ const actualizarProgresoProduccion = async (req, res) => {
     const turno = await pool.query(queryTurno);
     console.log(turno[0][0]);
 
+    if (turno[0][0].progresoProduccion <= 0) {
+      let fechaPrimeraPieza = new Date();
+      const query =
+        "update objetivo set progresoProduccion = progresoProduccion + 1, progresoProduccionHora = progresoProduccionHora + 1, primerPieza = ? where idTurno = ?";
+      const response = await pool.query(query, [
+        fechaPrimeraPieza,
+        turno[0][0].idTurno,
+      ]);
+    }
+
+    let fechaUltimaPieza = new Date();
     //Una vez teniendo el turno se aumenta 1 al progreso de produccion correspondiente al turno
     const query =
-      "update objetivo set progresoProduccion = progresoProduccion + 1, progresoProduccionHora = progresoProduccionHora + 1 where idTurno = ?";
-    const response = await pool.query(query, [turno[0][0].idTurno]);
+      "update objetivo set fecha = ?, progresoProduccion = progresoProduccion + 1, progresoProduccionHora = progresoProduccionHora + 1, ultimaPieza = ?, OEE = ? where idTurno = ?";
+    const response = await pool.query(query, [
+      new Date(),
+      fechaUltimaPieza,
+      ((turno[0][0].progresoProduccion + 1) /
+        turno[0][0].objetivoProduccionHora) *
+        100,
+      turno[0][0].idTurno,
+    ]);
 
     //Devuelve un estatus exitoso
     return res.status(200).send({
       message: "Progreso actualizado",
     });
   } catch (e) {
+    console.log(e);
     return res.status(500).send({
       message: "Hubo un error",
     });
