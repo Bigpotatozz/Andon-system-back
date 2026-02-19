@@ -188,7 +188,7 @@ const resetearProgresoProduccionHora = async (req, res) => {
 const obtenerTurnos = async (req, res) => {
   try {
     //Obtiene los turnos
-    const query = `SELECT * FROM turno`;
+    const query = `SELECT * FROM turno where idLineaProduccion = 1`;
     const turnos = await pool.query(query);
 
     //Devuelve una respuesta exitosa

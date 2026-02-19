@@ -113,6 +113,7 @@ const crearLinea2 = async (req, res) => {
 
     //OBTIENE EL ID DE LA LINEA DE PRODUCCION QUE SE ACABA DE INSERTAR
     const idLineaProduccion = insertarLineaProduccion[0].insertId;
+    console.log(turnos);
 
     //RECORRE EL ARREGLO DE TURNOS
     for (const turno of turnos) {
