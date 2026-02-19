@@ -43,7 +43,12 @@ const crearLinea = async (req, res) => {
       ]);
 
       //INSERTA LOS OBJETIVOS CORRESPONDIENTES A CADA TURNO (VERISION SINGLE LINE)
-      const insertarObjetivosQuery = `insert into objetivo(objetivoProduccionHora, objetivoProduccion, progresoProduccion, activo, idTurno)
+      const insertarObjetivosQuery = `insert into objetivo(
+      objetivoProduccionHora, 
+      objetivoProduccion, 
+      progresoProduccion, 
+      activo, 
+      idTurno)
       VALUES (?,?,?,?,?)`;
       const insertarObjetivos = await connection.query(insertarObjetivosQuery, [
         0,

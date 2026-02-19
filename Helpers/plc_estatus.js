@@ -1,6 +1,8 @@
 const { default: axios } = require("axios");
 const net = require("net");
 
+//SCRIPT FUERA DE SERVICIO
+//NO USAR
 class ClientProduccion {
   constructor(ip, puerto, dmInicial, cantidad) {
     this.ip = ip;
@@ -126,7 +128,7 @@ class ClientProduccion {
     // Validamos que recibimos la cantidad correcta
     if (this.valoresCicloActual.length !== this.cantidad) {
       console.warn(
-        `Recibidos: ${this.valoresCicloActual.length} esperados: ${this.cantidad}`
+        `Recibidos: ${this.valoresCicloActual.length} esperados: ${this.cantidad}`,
       );
     } else {
       this.finalizarCiclo();
@@ -170,7 +172,7 @@ let clienteActivo = null;
 const obtenerEstacionesProduccion = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:3000/api/linea/obtenerLineasRegistradas"
+      "http://localhost:3000/api/linea/obtenerLineasRegistradas",
     );
 
     const totalEstaciones = response.data.lineas.length;
@@ -191,7 +193,7 @@ const obtenerEstacionesProduccion = async () => {
         "192.168.0.10",
         8501,
         dmInicio,
-        totalEstaciones
+        totalEstaciones,
       );
       PLC.connect();
     } else {

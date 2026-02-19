@@ -16,7 +16,11 @@ const reset = async (req, res) => {
     const resetEstatusActual = `UPDATE estacion set estatusActual = 0`;
     const querResetEstatusActual = await pool.query(resetEstatusActual);
 
-    const resetTurno = `update objetivo set objetivoProduccionHora = 0, objetivoProduccion = 0, progresoProduccion = 0, progresoProduccionHora = 0`;
+    const resetTurno = `update objetivo set 
+    objetivoProduccionHora = 0, 
+    objetivoProduccion = 0, 
+    progresoProduccion = 0, 
+    progresoProduccionHora = 0`;
     const querResetTurno = await pool.query(resetTurno);
 
     return res.status(200).send({
