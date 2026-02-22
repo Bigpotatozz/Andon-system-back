@@ -32,6 +32,7 @@ const obtenerProductionRatio = async (req, res) => {
   }
 };
 
+let turnoActual = 1;
 const actualizarProgresoProduccionMultiLinea = async (req, res) => {
   const { idLineaProduccion } = req.params;
   try {
@@ -49,28 +50,34 @@ const actualizarProgresoProduccionMultiLinea = async (req, res) => {
     const turno = await pool.query(queryTurno, [idLineaProduccion]);
     console.log(turno[0][0]);
 
-    if (turno[0][0].progresoProduccion <= 0) {
-      let fechaPrimeraPieza = new Date();
+    if (turno[0][0].idTurno != turnoActual) {
+      historialObjetivo(turnoActual);
+      turnoActual = turno[0][0].idTurno;
+      console.log("turno diferente");
+    } else {
+      if (turno[0][0].progresoProduccion <= 0) {
+        let fechaPrimeraPieza = new Date();
+        const query =
+          "update objetivo set progresoProduccion = progresoProduccion + 1, progresoProduccionHora = progresoProduccionHora + 1, primerPieza = ? where idTurno = ?";
+        const response = await pool.query(query, [
+          fechaPrimeraPieza,
+          turno[0][0].idTurno,
+        ]);
+      }
+
+      let fechaUltimaPieza = new Date();
+      //Una vez teniendo el turno se aumenta 1 al progreso de produccion correspondiente al turno
       const query =
-        "update objetivo set progresoProduccion = progresoProduccion + 1, progresoProduccionHora = progresoProduccionHora + 1, primerPieza = ? where idTurno = ?";
+        "update objetivo set fecha = ?, progresoProduccion = progresoProduccion + 1, progresoProduccionHora = progresoProduccionHora + 1, ultimaPieza = ?, OEE = ? where idTurno = ?";
       const response = await pool.query(query, [
-        fechaPrimeraPieza,
+        new Date(),
+        fechaUltimaPieza,
+        ((turno[0][0].progresoProduccion + 1) /
+          turno[0][0].objetivoProduccionHora) *
+          100,
         turno[0][0].idTurno,
       ]);
     }
-
-    let fechaUltimaPieza = new Date();
-    //Una vez teniendo el turno se aumenta 1 al progreso de produccion correspondiente al turno
-    const query =
-      "update objetivo set fecha = ?, progresoProduccion = progresoProduccion + 1, progresoProduccionHora = progresoProduccionHora + 1, ultimaPieza = ?, OEE = ? where idTurno = ?";
-    const response = await pool.query(query, [
-      new Date(),
-      fechaUltimaPieza,
-      ((turno[0][0].progresoProduccion + 1) /
-        turno[0][0].objetivoProduccionHora) *
-        100,
-      turno[0][0].idTurno,
-    ]);
 
     //Devuelve un estatus exitoso
     return res.status(200).send({
@@ -81,6 +88,33 @@ const actualizarProgresoProduccionMultiLinea = async (req, res) => {
     return res.status(500).send({
       message: "Hubo un error",
     });
+  }
+};
+
+const historialObjetivo = async (idTurno) => {
+  try {
+    const query = "SELECT * FROM objetivo WHERE idTurno = ?";
+    const response = await pool.query(query, [idTurno]);
+
+    const insercion =
+      "INSERT INTO objetivoHistorial (objetivoProduccionHora, objetivoProduccion, progresoProduccion, progresoProduccionHora, fecha, primerPieza, ultimaPieza, OEE, idObjetivo, idTurno) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? ,?)";
+    const response2 = await pool.query(insercion, [
+      response[0][0].objetivoProduccionHora,
+      response[0][0].objetivoProduccion,
+      response[0][0].progresoProduccion,
+      response[0][0].progresoProduccionHora,
+      response[0][0].fecha,
+      response[0][0].primerPieza,
+      response[0][0].ultimaPieza,
+      response[0][0].OEE,
+      response[0][0].idObjetivo,
+      response[0][0].idTurno,
+    ]);
+
+    const reseteo = `UPDATE objetivo SET fecha = NULL, progresoProduccion = 0, progresoProduccionHora = 0, primerPieza = NULL, ultimaPieza = NULL, OEE = 0 WHERE idTurno = ?`;
+    const response3 = await pool.query(reseteo, [idTurno]);
+  } catch (e) {
+    console.log(e);
   }
 };
 
@@ -207,6 +241,8 @@ const obtenerTurnos = async (req, res) => {
 //Socket para obtener los turnos en caso de cambio (en base a la hora)
 const socketObtenerTurno = async (socket) => {
   //Query que obtiene el turno en base a la hora actual
+
+  let turnoActual = 0;
   const socketQuery = `
                                 SELECT * 
                                 FROM turno
