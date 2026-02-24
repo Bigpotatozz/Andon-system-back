@@ -7,6 +7,7 @@ const { estatus_router } = require("../Routes/EstatusRoutes.js");
 const { historicoRouter } = require("../Routes/HistoricoRoutes.js");
 const { socketRoutes } = require("../Routes/SocketRoutes.js");
 const { turnoRouter } = require("../Routes/TurnoRoutes.js");
+const analisis_router = require("../Routes/AnalisisRouter.js");
 
 //Inicializacion de la aplicacion
 class ServerNode {
@@ -42,6 +43,7 @@ class ServerNode {
     this.app.use("/api/estatus", estatus_router);
     this.app.use("/api/historico/", historicoRouter);
     this.app.use("/api/turno/", turnoRouter);
+    this.app.use("/api/analisis/", analisis_router);
   }
 
   socketEvents() {
