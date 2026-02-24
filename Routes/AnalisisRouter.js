@@ -1,12 +1,19 @@
 const { Router } = require("express");
 const {
   obtenerOEEMes,
-  obtenerRankingParos,
+  obtenerObjetivosDia,
+  obtenerRankingParosLinea,
+  obtenerRankingParosEstacion,
 } = require("../Controllers/analisisController");
 
 const analisis_router = Router();
 
 analisis_router.get("/obtenerOEE", obtenerOEEMes);
-analisis_router.get("/obtenerRankingParos", obtenerRankingParos);
+analisis_router.get("/obtenerRankingParosLinea", obtenerRankingParosLinea);
+analisis_router.get("/obtenerObjetivosDia", obtenerObjetivosDia);
+analisis_router.get(
+  "/obtenerRankingParosEstacion/",
+  obtenerRankingParosEstacion,
+);
 
 module.exports = analisis_router;

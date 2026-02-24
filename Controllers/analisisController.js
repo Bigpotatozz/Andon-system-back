@@ -30,12 +30,13 @@ GROUP BY t.idTurno;`;
   }
 };
 
-const obtenerRankingParos = async (req, res) => {
+const obtenerRankingParosLinea = async (req, res) => {
   try {
-    const data = `SELECT es.idLineaProduccion, e.colorId, SUM(t.contador) as cantidadTotal from detalleestacion as de
+    const data = `SELECT es.idLineaProduccion, lp.nombre, e.colorId, SUM(t.contador) as cantidadTotal, SUM(t.total) as tiempoTotal from detalleestacion as de
 inner join estatus as e on e.idEstatus = de.idEstatus
 inner join tiempo as t on t.idTiempo = de.idTiempo
 inner join estacion as es on es.idEstacion = de.idEstacion
+inner join lineaProduccion as lp on lp.idLineaProduccion = es.idLineaProduccion
 where e.colorId = 1003
 group by es.idLineaProduccion
 ORDER BY cantidadTotal DESC;`;
@@ -49,7 +50,52 @@ ORDER BY cantidadTotal DESC;`;
   }
 };
 
+const obtenerRankingParosEstacion = async (req, res) => {
+  try {
+    const data = `SELECT lp.nombre as linea, es.idEstacion, es.nombre, t.contador, t.total as segundos  from detalleestacion as de
+inner join estatus as e on e.idEstatus = de.idEstatus
+inner join tiempo as t on t.idTiempo = de.idTiempo
+inner join estacion as es on es.idEstacion = de.idEstacion
+inner join lineaProduccion as lp on lp.idLineaProduccion = es.idLineaProduccion
+where e.colorId = 1003
+ORDER BY t.contador DESC;`;
+
+    const datos = await pool.query(data);
+
+    return res.status(200).send(datos[0]);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "Error al obtener el ranking de paros" });
+  }
+};
+
+const obtenerInformacionGraficas = async (req, res) => {
+  try {
+    const data = `SELECT * FROM objetivoHistorial`;
+  } catch (e) {
+    console.log(e);
+    res
+      .status(500)
+      .json({ message: "Error al obtener la informacion de las graficas" });
+  }
+};
+
+const obtenerObjetivosDia = async (req, res) => {
+  try {
+    const data = `SELECT * FROM objetivoHistorial LIMIT 7`;
+
+    const datos = await pool.query(data);
+
+    return res.status(200).send(datos[0]);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "Error al obtener los objetivos del dia" });
+  }
+};
+
 module.exports = {
   obtenerOEEMes,
-  obtenerRankingParos,
+  obtenerRankingParosLinea,
+  obtenerObjetivosDia,
+  obtenerRankingParosEstacion,
 };
