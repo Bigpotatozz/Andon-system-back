@@ -30,6 +30,26 @@ GROUP BY t.idTurno;`;
   }
 };
 
+const obtenerRankingParos = async (req, res) => {
+  try {
+    const data = `SELECT es.idLineaProduccion, e.colorId, SUM(t.contador) as cantidadTotal from detalleestacion as de
+inner join estatus as e on e.idEstatus = de.idEstatus
+inner join tiempo as t on t.idTiempo = de.idTiempo
+inner join estacion as es on es.idEstacion = de.idEstacion
+where e.colorId = 1003
+group by es.idLineaProduccion
+ORDER BY cantidadTotal DESC;`;
+
+    const datos = await pool.query(data);
+
+    return res.status(200).send(datos[0]);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "Error al obtener el ranking de paros" });
+  }
+};
+
 module.exports = {
   obtenerOEEMes,
+  obtenerRankingParos,
 };
