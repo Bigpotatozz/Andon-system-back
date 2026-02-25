@@ -33,6 +33,19 @@ const agregarTurnos = async (req, res) => {
   }
 };
 
+const obtenerTurnosPorLinea = async (req, res) => {
+  const { idLineaProduccion } = req.params;
+  try {
+    const data = `SELECT * FROM turno WHERE idLineaProduccion = ?`;
+    const datos = await pool.query(data, [idLineaProduccion]);
+    return res.status(200).send(datos[0]);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error al obtener los turnos" });
+  }
+};
+
 module.exports = {
   agregarTurnos,
+  obtenerTurnosPorLinea,
 };

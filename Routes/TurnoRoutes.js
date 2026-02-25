@@ -7,6 +7,7 @@ const {
   obtenerTurnos,
   actualizarProgresoProduccionMultiLinea,
 } = require("../Controllers/productionController");
+const { obtenerTurnosPorLinea } = require("../Controllers/turnosController");
 
 const turnoRouter = Router();
 
@@ -30,5 +31,9 @@ turnoRouter.put(
 //Obtiene todos los turnos
 turnoRouter.get("/obtenerTurnos", obtenerTurnos);
 
+turnoRouter.get(
+  "/obtenerTurnosPorLinea/:idLineaProduccion",
+  obtenerTurnosPorLinea,
+);
 //Se exporta el router
 module.exports = { turnoRouter };

@@ -1,27 +1,25 @@
 const { pool } = require("../Config/connection");
 
 const obtenerOEEMes = async (req, res) => {
-  const { fechaInicio, fechaFin, idLineaProduccion, idTurno } = req.query;
+  const { fechaInicio, fechaFin } = req.query;
+
   try {
     const data = `SELECT 
     t.idTurno,
-    SUM(oh.objetivoProduccion) AS TotalObjetivo, 
-    SUM(oh.progresoProduccion) AS TotalRealizado,
-    (SUM(oh.progresoProduccion) / SUM(oh.objetivoProduccion)) * 100 AS PorcentajeCumplimiento
-FROM objetivoHistorial AS oh
-INNER JOIN objetivo AS o ON o.idObjetivo = oh.idObjetivo
-INNER JOIN turno AS t ON o.idTurno = t.idTurno
-WHERE oh.fecha >= ? AND oh.fecha <= ? 
-  AND t.idLineaProduccion = ? 
-  AND t.idTurno = ?
-GROUP BY t.idTurno;`;
+    t.idLineaProduccion,
+    t.nombreTurno,
+    lp.nombre as lineaProduccion,
+    SUM(oh.objetivoProduccion) AS totalObjetivo, 
+    SUM(oh.progresoProduccion) AS totalRealizado,
+    (SUM(oh.progresoProduccion) / SUM(oh.objetivoProduccion)) * 100 AS porcentajeCumplimiento
+    FROM objetivoHistorial AS oh
+    INNER JOIN objetivo AS o ON o.idObjetivo = oh.idObjetivo
+    INNER JOIN turno AS t ON o.idTurno = t.idTurno
+    INNER JOIN lineaProduccion AS lp ON lp.idLineaProduccion = t.idLineaProduccion
+    WHERE oh.fecha >= ? AND oh.fecha <= ? 
+    GROUP BY t.idTurno;`;
 
-    const datos = await pool.query(data, [
-      fechaInicio,
-      fechaFin,
-      idLineaProduccion,
-      idTurno,
-    ]);
+    const datos = await pool.query(data, [fechaInicio, fechaFin]);
 
     return res.status(200).send(datos[0]);
   } catch (error) {
@@ -66,17 +64,6 @@ ORDER BY t.contador DESC;`;
   } catch (e) {
     console.log(e);
     res.status(500).json({ message: "Error al obtener el ranking de paros" });
-  }
-};
-
-const obtenerInformacionGraficas = async (req, res) => {
-  try {
-    const data = `SELECT * FROM objetivoHistorial`;
-  } catch (e) {
-    console.log(e);
-    res
-      .status(500)
-      .json({ message: "Error al obtener la informacion de las graficas" });
   }
 };
 
