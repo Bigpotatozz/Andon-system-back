@@ -5,8 +5,9 @@ class Client {
   constructor(ip, puerto, dmInicial, cantidad) {
     this.ip = ip;
     this.puerto = puerto;
-    this.dmInicial = dmInicial;
+    this.dmInicial = dmInicial + 5;
     this.cantidad = cantidad;
+
     this.client = null;
     this.isConnected = false;
     this.buffer = "";
@@ -180,6 +181,28 @@ class Client {
       }
     });
 
+    //Define la variable de inicio contando el total y le resta 5
+    //Si son 135 le resta 5 y da 130 que es la variable inicial de produccion
+    let indiceInicioProgreso = this.valoresCicloActual.length - 5;
+    //Defina la variable final que vendria siendo el conteo de todas estas
+    let indiceFinProgreso = this.valoresCicloActual.length;
+
+    //Una vez teniendo el indice se crea otro arreglo que corta el arreglo en la posicion indiceInicioProgreso
+    //Hasta indiceFinProgreso
+    const valoresProgreso = this.valoresCicloActual.slice(
+      indiceInicioProgreso,
+      indiceFinProgreso,
+    );
+
+    //El arreglo que se recorto se recorre uno en uno
+    valoresProgreso.forEach((index, linea) => {
+      //Si encuentra que un elemento de ese arreglo es 1
+      if (linea === 1) {
+        //Envia la peticion http con el indice de ese arreglo
+        this.actualizarEstatus(index + 1);
+      }
+    });
+
     console.log(this.valoresCicloActual);
     console.log(`POOL: ${new Date()}`);
     this.valoresCicloAnterior = [...this.valoresCicloActual];
@@ -210,6 +233,16 @@ class Client {
       console.log(`ACTUALIZADO E${idEstacion}: ${codigoColor}`);
     } catch (err) {
       console.error(`Error enviando datos E${idEstacion}: ${err.message}`);
+    }
+  }
+
+  async actualizarEstatus(idLinea) {
+    try {
+      await axios.post(
+        `http://localhost:3000/api/turno/actualizarProgresoProduccionMultiLinea/${idLinea}`,
+      );
+    } catch (e) {
+      console.log(`Error enviando datos E${idLinea}: ${e.message}`);
     }
   }
 }
