@@ -194,11 +194,15 @@ class Client {
       indiceFinProgreso,
     );
 
+    console.log("VALORES PRODUCCION: ", valoresProgreso);
     //El arreglo que se recorto se recorre uno en uno
-    valoresProgreso.forEach((index, linea) => {
+    valoresProgreso.forEach((linea, index) => {
       //Si encuentra que un elemento de ese arreglo es 1
-      if (linea === 1) {
-        //Envia la peticion http con el indice de ese arreglo
+      if (linea != 1) {
+        console.log("NO HAY PRODUCCION EN LA LINEA: ", index + 1);
+      }
+
+      if (linea == 1) {
         this.actualizarEstatus(index + 1);
       }
     });
