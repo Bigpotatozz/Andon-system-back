@@ -5,7 +5,7 @@ class Client {
   constructor(ip, puerto, dmInicial, cantidad) {
     this.ip = ip;
     this.puerto = puerto;
-    this.dmInicial = dmInicial + 5;
+    this.dmInicial = dmInicial;
     this.cantidad = cantidad;
 
     this.client = null;
@@ -287,7 +287,7 @@ const obtenerEstaciones = async () => {
       "192.168.0.10",
       8501,
       dmInicio,
-      cantidadVariables,
+      cantidadVariables + 5,
     );
     clienteActivo.connect();
   } catch (e) {

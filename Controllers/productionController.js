@@ -32,7 +32,7 @@ const obtenerProductionRatio = async (req, res) => {
   }
 };
 
-let turnoActual = 1;
+let turnoActual = [1, 4, 7, 10, 13];
 const actualizarProgresoProduccionMultiLinea = async (req, res) => {
   const { idLineaProduccion } = req.params;
   try {
@@ -50,9 +50,9 @@ const actualizarProgresoProduccionMultiLinea = async (req, res) => {
     const turno = await pool.query(queryTurno, [idLineaProduccion]);
     console.log(turno[0][0]);
 
-    if (turno[0][0].idTurno != turnoActual) {
+    if (turno[0][0].idTurno != turnoActual[idLineaProduccion - 1]) {
       historialObjetivo(turnoActual);
-      turnoActual = turno[0][0].idTurno;
+      turnoActual[idLineaProduccion - 1] = turno[0][0].idTurno;
       console.log("turno diferente");
     } else {
       if (turno[0][0].progresoProduccion <= 0) {
