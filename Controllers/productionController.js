@@ -51,7 +51,7 @@ const actualizarProgresoProduccionMultiLinea = async (req, res) => {
     console.log(turno[0][0]);
 
     if (turno[0][0].idTurno != turnoActual[idLineaProduccion - 1]) {
-      historialObjetivo(turnoActual);
+      await historialObjetivo(turnoActual[idLineaProduccion - 1]);
       turnoActual[idLineaProduccion - 1] = turno[0][0].idTurno;
       console.log("turno diferente");
     } else {
