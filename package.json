@@ -23,6 +23,7 @@
     "node-cron": "^4.2.1",
     "node-red": "^4.1.1",
     "nodemon": "^3.1.10",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "st-ethernet-ip": "^2.7.5"
   }
 }

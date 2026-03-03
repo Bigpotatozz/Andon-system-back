@@ -3,6 +3,7 @@ const { pool } = require("../Config/connection");
 const { obtenerIps, obtenerEstaciones } = require("../Helpers/plc");
 const { obtenerEstacionesProduccion } = require("../Helpers/plc_estatus");
 const { calcularHoras } = require("../Helpers/calcularDifHoras");
+const { obtenerEstacionesBradley } = require("../Helpers/plcAllenBradley");
 
 //Crea una nueva linea de produccion (VERSION SINGLE LINE)
 const crearLinea = async (req, res) => {
@@ -335,8 +336,11 @@ const obtenerEstacionesTiempos = async (req, res) => {
 const iniciarPLC = async (req, res) => {
   try {
     //Ejecuta la funcion que ejecuta el socket
-    obtenerEstaciones();
+    //KEYENCE
+    // obtenerEstaciones();
 
+    //ALLEN BRADLEY
+    obtenerEstacionesBradley();
     //Devuelve una respuesta correcta
     return res.status(200).send({
       message: "PLC iniciado correctamente",

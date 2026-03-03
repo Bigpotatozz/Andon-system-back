@@ -115,6 +115,8 @@ const actualizarEstatus = async (req, res) => {
     //Accede al body
     const { color, idLineaProduccion } = req.body;
 
+    console.log(color, idLineaProduccion);
+
     //Obtiene el detalleProduccion de esa linea
     const queryObtenerIdEstatus = `select * from detalleEstacion as dl
                                     inner join estatus as e on dl.idEstatus = e.idEstatus
