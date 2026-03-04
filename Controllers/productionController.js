@@ -73,7 +73,7 @@ const actualizarProgresoProduccionMultiLinea = async (req, res) => {
         new Date(),
         fechaUltimaPieza,
         ((turno[0][0].progresoProduccion + 1) /
-          turno[0][0].objetivoProduccionHora) *
+          turno[0][0].objetivoProduccion) *
           100,
         turno[0][0].idTurno,
       ]);
