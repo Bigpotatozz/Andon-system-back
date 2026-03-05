@@ -30,7 +30,7 @@ lineaRouter.get(
   obtenerEstacionesTiempos,
 );
 //Inicia el script del PLC
-lineaRouter.get("/iniciarPLC", iniciarPLC);
+lineaRouter.post("/iniciarPLC", iniciarPLC);
 
 //Obtiene las estaciones por linea de produccion
 lineaRouter.get(

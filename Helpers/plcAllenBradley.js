@@ -158,8 +158,11 @@ class AllenBradleyClient {
 
 let clienteActivo = null;
 
-const obtenerEstacionesBradley = async () => {
+const obtenerEstacionesBradley = async (ip) => {
   try {
+    console.log("ALLEN BRADLEY SCRIPT");
+    console.log("IP: ", ip);
+
     const response = await axios.get(
       "http://localhost:3000/api/linea/obtenerLineasRegistradas",
     );
@@ -187,7 +190,7 @@ const obtenerEstacionesBradley = async () => {
     const tamanoDelArreglo = cantidadVariables;
 
     clienteActivo = new AllenBradleyClient(
-      "192.168.0.20",
+      ip,
       0,
       nombreDelArreglo,
       tamanoDelArreglo,

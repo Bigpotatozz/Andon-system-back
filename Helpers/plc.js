@@ -253,8 +253,11 @@ class Client {
 
 let clienteActivo = null;
 
-const obtenerEstaciones = async () => {
+const obtenerEstaciones = async (ip) => {
   try {
+    console.log("KEYENCE SCRIPT");
+    console.log("IP: ", ip);
+
     const response = await axios.get(
       "http://localhost:3000/api/linea/obtenerLineasRegistradas",
     );
@@ -283,12 +286,7 @@ const obtenerEstaciones = async () => {
 
     // Iniciar nuevo cliente
     console.log(`Iniciando monitoreo de ${totalEstaciones} estaciones...`);
-    clienteActivo = new Client(
-      "192.168.0.10",
-      8501,
-      dmInicio,
-      cantidadVariables + 5,
-    );
+    clienteActivo = new Client(ip, 8501, dmInicio, cantidadVariables + 5);
     clienteActivo.connect();
   } catch (e) {
     console.error("Error en obtenerEstaciones:", e.message);

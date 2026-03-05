@@ -334,13 +334,21 @@ const obtenerEstacionesTiempos = async (req, res) => {
 
 //Inicia la conexion con el plc
 const iniciarPLC = async (req, res) => {
+  const { marca, ip } = req.body;
   try {
+    console.log("marca: ", marca);
+    console.log("ip: ", ip);
     //Ejecuta la funcion que ejecuta el socket
     //KEYENCE
-    // obtenerEstaciones();
+
+    if (marca === "Keyence") {
+      obtenerEstaciones(ip);
+    }
 
     //ALLEN BRADLEY
-    obtenerEstacionesBradley();
+    if (marca === "Allen Bradley") {
+      obtenerEstacionesBradley(ip);
+    }
     //Devuelve una respuesta correcta
     return res.status(200).send({
       message: "PLC iniciado correctamente",
