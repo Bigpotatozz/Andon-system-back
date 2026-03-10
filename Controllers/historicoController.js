@@ -1,6 +1,6 @@
 const { pool } = require("../Config/connection");
 
-//Inserta el tiempo en historico y resetea la tabla tiempo original
+//Inserta el tiempo en historico y resetea la tabla tiempo original (Funcional en version single line)
 const reset = async (req, res) => {
   try {
     //INSERCION EN TABLA DE TIEMPO HISTORICO
@@ -16,6 +16,7 @@ const reset = async (req, res) => {
     const resetEstatusActual = `UPDATE estacion set estatusActual = 0`;
     const querResetEstatusActual = await pool.query(resetEstatusActual);
 
+    //Resetea el turno
     const resetTurno = `update objetivo set 
     objetivoProduccionHora = 0, 
     objetivoProduccion = 0, 

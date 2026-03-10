@@ -33,12 +33,19 @@ const agregarTurnos = async (req, res) => {
   }
 };
 
+//Obtiene los turnos que tiene cada linea de produccion (Principalmente para version MultiLine)
 const obtenerTurnosPorLinea = async (req, res) => {
+  //Accede a la linea de produccion
   const { idLineaProduccion } = req.params;
   try {
+    //Consulta para obtener dichis turnos
     const data = `SELECT * FROM turno WHERE idLineaProduccion = ?`;
+    //Ejecuta la consulta
     const datos = await pool.query(data, [idLineaProduccion]);
+    //Devuelve la respuesta
     return res.status(200).send(datos[0]);
+
+    //En caso de error devuelve el error
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error al obtener los turnos" });

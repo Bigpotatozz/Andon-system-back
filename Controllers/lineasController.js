@@ -503,7 +503,7 @@ const obtenerTiemposPorEstacion = async (req, res) => {
 //Envia en tiempo real las estaciones registradas
 const socketObtenerEstaciones = async (socket) => {
   //Query para obtener las estaciones
-  const socketQuery = `Select idEstacion, nombre,progreso from estacion;`;
+  const socketQuery = `SELECT idEstacion, nombre,progreso FROM estacion;`;
 
   //Ejecuta un ciclo que checa si hay cambios cada 2 segundos
   const intervalEstaciones = setInterval(async () => {

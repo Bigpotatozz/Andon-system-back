@@ -6,10 +6,10 @@ const obtenerProductionRatio = async (req, res) => {
   const { idTurno } = req.params;
   try {
     //Accede a la informacion y hace los joins de la linea con su respectivo turno
-    const productionRatioQuery = `select * from lineaproduccion 
-                                join turno on turno.idLineaProduccion = lineaproduccion.idLineaProduccion
-                                join objetivo on objetivo.idTurno = turno.idTurno
-                                where turno.idTurno = ?
+    const productionRatioQuery = `SELECT * FROM lineaproduccion 
+                                JOIN turno on turno.idLineaProduccion = lineaproduccion.idLineaProduccion
+                                JOIN objetivo on objetivo.idTurno = turno.idTurno
+                                WHERE turno.idTurno = ?
                                 LIMIT 1                                
                                 `;
     const productionRatio = await pool.query(productionRatioQuery, [idTurno]);
@@ -39,7 +39,7 @@ const actualizarProgresoProduccionMultiLinea = async (req, res) => {
     //Se accede al turno en base a la hora
     const queryTurno = `SELECT * 
                                 FROM turno
-                                inner join objetivo on objetivo.idTurno = turno.idTurno
+                                INNER JOIN objetivo ON objetivo.idTurno = turno.idTurno
                                 WHERE (
                                   (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
                                   OR
@@ -124,7 +124,7 @@ const actualizarProgresoProduccion = async (req, res) => {
     //Se accede al turno en base a la hora
     const queryTurno = `SELECT * 
                                 FROM turno
-                                inner join objetivo on objetivo.idTurno = turno.idTurno
+                                INNER JOIN objetivo on objetivo.idTurno = turno.idTurno
                                 WHERE (
                                   (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
                                   OR
@@ -222,7 +222,7 @@ const resetearProgresoProduccionHora = async (req, res) => {
 const obtenerTurnos = async (req, res) => {
   try {
     //Obtiene los turnos
-    const query = `SELECT * FROM turno where idLineaProduccion = 1`;
+    const query = `SELECT * FROM turno WHERE idLineaProduccion = 1`;
     const turnos = await pool.query(query);
 
     //Devuelve una respuesta exitosa
