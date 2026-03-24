@@ -9,19 +9,19 @@ const obtenerOEEMes = async (req, res) => {
   try {
     //Ejectua la consulta para calcular dicho OEE
     const data = `SELECT 
-    t.idTurno,
-    t.idLineaProduccion,
-    t.nombreTurno,
-    lp.nombre as lineaProduccion,
-    SUM(oh.objetivoProduccion) AS totalObjetivo, 
-    SUM(oh.progresoProduccion) AS totalRealizado,
-    (SUM(oh.progresoProduccion) / SUM(oh.objetivoProduccion)) * 100 AS porcentajeCumplimiento
-    FROM objetivoHistorial AS oh
-    INNER JOIN objetivo AS o ON o.idObjetivo = oh.idObjetivo
-    INNER JOIN turno AS t ON o.idTurno = t.idTurno
-    INNER JOIN lineaProduccion AS lp ON lp.idLineaProduccion = t.idLineaProduccion
-    WHERE oh.fecha >= ? AND oh.fecha <= ? 
-    GROUP BY t.idTurno;`;
+                  t.idTurno,
+                  t.idLineaProduccion,
+                  t.nombreTurno,
+                  lp.nombre as lineaProduccion,
+                  SUM(oh.objetivoProduccion) AS totalObjetivo, 
+                  SUM(oh.progresoProduccion) AS totalRealizado,
+                  (SUM(oh.progresoProduccion) / SUM(oh.objetivoProduccion)) * 100 AS porcentajeCumplimiento
+                  FROM objetivoHistorial AS oh
+                  INNER JOIN objetivo AS o ON o.idObjetivo = oh.idObjetivo
+                  INNER JOIN turno AS t ON o.idTurno = t.idTurno
+                  INNER JOIN lineaProduccion AS lp ON lp.idLineaProduccion = t.idLineaProduccion
+                  WHERE oh.fecha >= ? AND oh.fecha <= ? 
+                  GROUP BY t.idTurno;`;
 
     //Ejecuta la consulta en base de datos
     const datos = await pool.query(data, [fechaInicio, fechaFin]);
@@ -40,13 +40,13 @@ const obtenerRankingParosLinea = async (req, res) => {
   try {
     //Consulta para calcular el ranking
     const data = `SELECT es.idLineaProduccion, lp.nombre, e.colorId, SUM(t.contador) as cantidadTotal, SUM(t.total) as tiempoTotal from detalleestacion as de
-inner join estatus as e on e.idEstatus = de.idEstatus
-inner join tiempo as t on t.idTiempo = de.idTiempo
-inner join estacion as es on es.idEstacion = de.idEstacion
-inner join lineaProduccion as lp on lp.idLineaProduccion = es.idLineaProduccion
-where e.colorId = 1003
-group by es.idLineaProduccion
-ORDER BY cantidadTotal DESC;`;
+                  inner join estatus as e on e.idEstatus = de.idEstatus
+                  inner join tiempo as t on t.idTiempo = de.idTiempo
+                  inner join estacion as es on es.idEstacion = de.idEstacion
+                  inner join lineaProduccion as lp on lp.idLineaProduccion = es.idLineaProduccion
+                  where e.colorId = 1003
+                  group by es.idLineaProduccion
+                  ORDER BY cantidadTotal DESC;`;
 
     //Ejecucion de consulta
     const datos = await pool.query(data);
@@ -66,12 +66,12 @@ const obtenerRankingParosEstacion = async (req, res) => {
   try {
     //Consulta que calcula el ranking
     const data = `SELECT lp.nombre as linea, es.idEstacion, es.nombre, t.contador, t.total as segundos  from detalleestacion as de
-inner join estatus as e on e.idEstatus = de.idEstatus
-inner join tiempo as t on t.idTiempo = de.idTiempo
-inner join estacion as es on es.idEstacion = de.idEstacion
-inner join lineaProduccion as lp on lp.idLineaProduccion = es.idLineaProduccion
-where e.colorId = 1003
-ORDER BY t.contador DESC;`;
+                  inner join estatus as e on e.idEstatus = de.idEstatus
+                  inner join tiempo as t on t.idTiempo = de.idTiempo
+                  inner join estacion as es on es.idEstacion = de.idEstacion
+                  inner join lineaProduccion as lp on lp.idLineaProduccion = es.idLineaProduccion
+                  where e.colorId = 1003
+                  ORDER BY t.contador DESC;`;
 
     //Ejecucion de consulta en bd
     const datos = await pool.query(data);

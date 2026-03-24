@@ -38,15 +38,14 @@ const actualizarProgresoProduccionMultiLinea = async (req, res) => {
   try {
     //Se accede al turno en base a la hora
     const queryTurno = `SELECT * 
-                                FROM turno
-                                INNER JOIN objetivo ON objetivo.idTurno = turno.idTurno
-                                WHERE (
-                                  (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
-                                  OR
-                                  (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
-                                )
-                                AND idLineaProduccion = ?
-                                LIMIT 1`;
+                        FROM turno
+                        INNER JOIN objetivo ON objetivo.idTurno = turno.idTurno
+                        WHERE (
+                          (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
+                            OR
+                          (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin)))
+                            AND idLineaProduccion = ?
+                        LIMIT 1`;
     const turno = await pool.query(queryTurno, [idLineaProduccion]);
     console.log(turno[0][0]);
 
@@ -123,14 +122,14 @@ const actualizarProgresoProduccion = async (req, res) => {
   try {
     //Se accede al turno en base a la hora
     const queryTurno = `SELECT * 
-                                FROM turno
-                                INNER JOIN objetivo on objetivo.idTurno = turno.idTurno
-                                WHERE (
-                                  (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
-                                  OR
-                                  (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
-                                )
-                                LIMIT 1`;
+                        FROM turno
+                        INNER JOIN objetivo on objetivo.idTurno = turno.idTurno
+                        WHERE (
+                          (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
+                          OR
+                          (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
+                          )
+                        LIMIT 1`;
     const turno = await pool.query(queryTurno);
     console.log(turno[0][0]);
 
@@ -173,8 +172,7 @@ const actualizarProgresoProduccion = async (req, res) => {
 const obtenerTurno = async (req, res) => {
   try {
     //Query para obtener el turno
-    const queryEnviarTurno = `
-                                SELECT * 
+    const queryEnviarTurno = `SELECT * 
                                 FROM turno
                                 WHERE (
                                   (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
@@ -243,16 +241,15 @@ const socketObtenerTurno = async (socket) => {
   //Query que obtiene el turno en base a la hora actual
 
   let turnoActual = 0;
-  const socketQuery = `
-                                SELECT * 
-                                FROM turno
-                                INNER JOIN objetivo ON objetivo.idTurno = turno.idTurno
-                                WHERE (
-                                  (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
-                                  OR
-                                  (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
+  const socketQuery = `SELECT * 
+                        FROM turno
+                        INNER JOIN objetivo ON objetivo.idTurno = turno.idTurno
+                        WHERE (
+                          (horaInicio < horaFin AND CURTIME() >= horaInicio AND CURTIME() < horaFin)
+                          OR
+                          (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
                                 )
-                                LIMIT 1
+                        LIMIT 1
                               `;
 
   const estatusInterval = setInterval(async () => {

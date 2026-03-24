@@ -336,11 +336,11 @@ const obtenerEstatusTiempos = async (req, res) => {
   try {
     //Obtiene los estatus con sus respectivos tiempos
     const queryEstatusTiempos = `SELECT * 
-                    FROM estacion 
-                    JOIN detalleEstacion ON estacion.idEstacion = detalleEstacion.idEstacion
-                    JOIN estatus ON estatus.idEstatus = detalleEstacion.idEstatus
-                    JOIN tiempo ON tiempo.idTiempo = detalleEstacion.idTiempo
-                    ORDER BY estacion.idEstacion;`;
+                                  FROM estacion 
+                                  JOIN detalleEstacion ON estacion.idEstacion = detalleEstacion.idEstacion
+                                  JOIN estatus ON estatus.idEstatus = detalleEstacion.idEstatus
+                                  JOIN tiempo ON tiempo.idTiempo = detalleEstacion.idTiempo
+                                  ORDER BY estacion.idEstacion;`;
     const tiempos = await pool.query(queryEstatusTiempos);
 
     //Si no hay ningun estatus registrado devuelve el error

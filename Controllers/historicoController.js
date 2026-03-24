@@ -18,10 +18,10 @@ const reset = async (req, res) => {
 
     //Resetea el turno
     const resetTurno = `update objetivo set 
-    objetivoProduccionHora = 0, 
-    objetivoProduccion = 0, 
-    progresoProduccion = 0, 
-    progresoProduccionHora = 0`;
+                        objetivoProduccionHora = 0, 
+                        objetivoProduccion = 0, 
+                        progresoProduccion = 0, 
+                        progresoProduccionHora = 0`;
     const querResetTurno = await pool.query(resetTurno);
 
     return res.status(200).send({

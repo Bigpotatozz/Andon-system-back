@@ -45,12 +45,12 @@ const crearLinea = async (req, res) => {
 
       //INSERTA LOS OBJETIVOS CORRESPONDIENTES A CADA TURNO (VERISION SINGLE LINE)
       const insertarObjetivosQuery = `insert into objetivo(
-      objetivoProduccionHora, 
-      objetivoProduccion, 
-      progresoProduccion, 
-      activo, 
-      idTurno)
-      VALUES (?,?,?,?,?)`;
+                                      objetivoProduccionHora, 
+                                      objetivoProduccion, 
+                                      progresoProduccion, 
+                                      activo, 
+                                      idTurno)
+                                      VALUES (?,?,?,?,?)`;
       const insertarObjetivos = await connection.query(insertarObjetivosQuery, [
         0,
         0,
@@ -304,11 +304,11 @@ const obtenerEstacionesTiempos = async (req, res) => {
   try {
     //Ejectua el select y sus inners para obtener la informacion
     const queryEstacionesTiempo = `select * from estacion 
-                            join detalleEstacion on detalleEstacion.idEstatus = estacion.estatusActual
-                            join estatus on estatus.idEstatus = detalleEstacion.idEstatus
-                            join tiempo on tiempo.idTiempo = detalleEstacion.idTiempo
-                            where estacion.idEstacion = detalleEstacion.idEstacion                            
-                            and estacion.idEstacion = ?;`;
+                                    join detalleEstacion on detalleEstacion.idEstatus = estacion.estatusActual
+                                    join estatus on estatus.idEstatus = detalleEstacion.idEstatus
+                                    join tiempo on tiempo.idTiempo = detalleEstacion.idTiempo
+                                    where estacion.idEstacion = detalleEstacion.idEstacion                            
+                                    and estacion.idEstacion = ?;`;
     const estacionesTiempo = await pool.query(queryEstacionesTiempo, [
       idEstacion,
     ]);
@@ -447,8 +447,7 @@ const obtenerTiemposPorLinea = async (req, res) => {
   const { idLineaProduccion } = req.params;
   try {
     //Ejecuta el select para obtener las estaciones con sus respectivos joins
-    const queryTiempos = `
-                          select 
+    const queryTiempos = `select 
                           lp.idLineaProduccion, lp.nombre,
                           e.idEstacion, e.nombre as nombreEstacion, e.estatusActual, e.progreso,
                           de.idDetalleEstacion, de.idEstatus, de.idEstacion, de.idTiempo,
@@ -481,8 +480,7 @@ const obtenerTiemposPorEstacion = async (req, res) => {
   const { idEstacion } = req.params;
   try {
     //Ejecuta el select y usa los respectivos joins para formar la informacion
-    const queryTiempos = `
-                          select * from detalleestacion as de
+    const queryTiempos = `select * from detalleestacion as de
                           inner join tiempo on de.idTiempo = tiempo.idTiempo
                           inner join estatus on de.idEstatus = estatus.idEstatus
                           where idEstacion = ?;`;
