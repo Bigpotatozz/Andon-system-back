@@ -1,5 +1,4 @@
 const { pool } = require("../Config/connection");
-
 //Consulta que va obteniendo el OEE acumulado del mes
 const obtenerOEEMes = async (req, res) => {
   //Indicas la fecha inicio y fecha  de fin
@@ -101,9 +100,33 @@ const obtenerObjetivosDia = async (req, res) => {
   }
 };
 
+const socketObtenerOEEPrincipal = async (socket) => {
+  //Query para obtener las estaciones
+  const socketQuery = `select * from lineaproduccion as lp
+inner join turno as t on t.idLineaProduccion = lp.idLineaProduccion
+inner join objetivo as o on o.idTurno = t.idTurno
+where o.OEE IS NOT NUll;`;
+
+  //Ejecuta un ciclo que checa si hay cambios cada 2 segundos
+  const intervalEstaciones = setInterval(async () => {
+    try {
+      const response = await pool.query(socketQuery);
+      socket.emit("obtenerOEESocket", response[0]);
+    } catch (e) {
+      console.log(e);
+    }
+  }, 2000);
+
+  socket.on("disconnect", () => {
+    clearInterval(intervalEstaciones);
+    console.log("Intervalo terminado");
+  });
+};
+
 module.exports = {
   obtenerOEEMes,
   obtenerRankingParosLinea,
   obtenerObjetivosDia,
   obtenerRankingParosEstacion,
+  socketObtenerOEEPrincipal,
 };

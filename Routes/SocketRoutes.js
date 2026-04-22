@@ -1,3 +1,6 @@
+const {
+  socketObtenerOEEPrincipal,
+} = require("../Controllers/analisisController");
 const { socketObtenerEstatus } = require("../Controllers/estatusController");
 const {
   socketObtenerLineasController,
@@ -24,6 +27,10 @@ const socketRoutes = async (io) => {
     //socket que obtiene las estaciones
     socket.on("obtenerEstaciones", () => {
       socketObtenerEstaciones(socket);
+    });
+
+    socket.on("obtenerOEESocket", () => {
+      socketObtenerOEEPrincipal(socket);
     });
   });
 };

@@ -58,7 +58,7 @@ class ServerNode {
 
     this.io = new Server(this.httpServer, {
       cors: {
-        origin: "http://localhost:7001", // SINTAXIS CORRECTA
+        origin: "*", // SINTAXIS CORRECTA
         methods: ["GET", "POST"],
         credentials: true,
       },

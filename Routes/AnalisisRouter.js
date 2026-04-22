@@ -4,6 +4,7 @@ const {
   obtenerObjetivosDia,
   obtenerRankingParosLinea,
   obtenerRankingParosEstacion,
+  obtenerOEEPrincipal,
 } = require("../Controllers/analisisController");
 
 const analisis_router = Router();
