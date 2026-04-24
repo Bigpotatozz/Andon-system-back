@@ -34,9 +34,9 @@ estatus_router.get(
   obtenerEstatusProductionRatio,
 );
 //Activa un estatus de production ratio
-estatus_router.post("/activarEstatus", activarEstatus);
+estatus_router.post("/activarEstatus/:idLinea", activarEstatus);
 //Obtiene el estatus activo de production ratio
-estatus_router.get("/obtenerEstatusRatio", obtenerEstatusRatio);
+estatus_router.get("/obtenerEstatusRatio/:idLinea", obtenerEstatusRatio);
 //Obtiene los tiempos de los estatus
 estatus_router.get("/obtenerEstatusTiempos/", obtenerEstatusTiempos);
 //Obtiene un tiempo en especifico de un estatus

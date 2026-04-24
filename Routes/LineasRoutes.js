@@ -12,6 +12,7 @@ const {
   obtenerTiemposPorLinea,
   obtenerTiemposPorEstacion,
   crearLinea2,
+  obtenerProductionRatioPorLinea,
 } = require("../Controllers/lineasController");
 
 //Rutas de las lineas de produccion
@@ -23,7 +24,10 @@ lineaRouter.get("/verificarExistenciaLinea/:idLinea", verificarExistenciaLinea);
 //Obtiene todas las estaciones registradas
 lineaRouter.get("/obtenerLineasRegistradas", obtenerLineasRegistradas);
 //Actualiza el production ratio de una linea
-lineaRouter.put("/actualizarProductionRatio", actualizarProductionRatio);
+lineaRouter.put(
+  "/actualizarProductionRatio/:idLinea",
+  actualizarProductionRatio,
+);
 //Obtiene los tiempos de las estaciones
 lineaRouter.get(
   "/obtenerEstacionesTiempos/:idEstacion",
@@ -48,5 +52,7 @@ lineaRouter.get("/tiemposPorLinea/:idLineaProduccion", obtenerTiemposPorLinea);
 lineaRouter.get("/tiemposPorEstacion/:idEstacion", obtenerTiemposPorEstacion);
 //Crear linea de produccion (SOLO VERSION MULTILINE)
 lineaRouter.post("/crearLinea2", crearLinea2);
+//Obtiene los tiempos de production ratio de una linea en especifico
+lineaRouter.get("/obtenerProductionRatioPorLinea/:idLinea", obtenerProductionRatioPorLinea);
 //Exportacion del router
 module.exports = { lineaRouter };

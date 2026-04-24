@@ -241,55 +241,66 @@ const obtenerLineasRegistradas = async (req, res) => {
 //Actualiza el production ratio de una linea de produccion
 const actualizarProductionRatio = async (req, res) => {
   //Se accede al body
-  const { lunch, descanso, paro, kyt, turno, cicleTime } = req.body;
+  const { lunch, descanso, paro, pqTime } = req.body;
+  const { idLinea } = req.params;
+
+  console.log("lunch: ", lunch);
+  console.log("descanso: ", descanso);
+  console.log("paro: ", paro);
+  console.log("kyt: ", pqTime);
+  console.log("idLinea: ", idLinea);
   //Se inicializa la transaccion
-  const connection = await pool.getConnection();
   try {
     //Se inicia la transaccion
-    await connection.beginTransaction();
-    //Se actualiza el tiempo definido de LUNCH
-    const queryLunch = `UPDATE estatus set tiempoDefinido = ? where colorId = 1011;`;
-    const responseLunch = await connection.query(queryLunch, [lunch]);
 
-    //Se actualiza el tiempo definido de BREAK
-    const queryDescanso = `UPDATE estatus set tiempoDefinido = ? where colorId = 1012;`;
-    const responseDescanso = await connection.query(queryDescanso, [descanso]);
+    const updateEstaciones = `select * from estatuspr where idLineaProduccion = ?`;
+    const responseEstaciones = await pool.query(updateEstaciones, [idLinea]);
 
-    //Se actualiza el tiempo definido de PARO
-    const queryParo = `UPDATE estatus set tiempoDefinido = ? where colorId = 1013;`;
-    const responseParo = await connection.query(queryParo, [paro]);
-
-    //Se actualiza el tiempo definido de PQ TIME / KYT
-    const queryKYT = `UPDATE estatus set tiempoDefinido = ? where colorId = 1014;`;
-    const responseKYT = await connection.query(queryKYT, [kyt]);
-
-    //Se obtiene el turno (lo manda el frontend)
-    const queryTurno = "select * from turno where idTurno = ?";
-    const turnoInfo = await connection.query(queryTurno, [turno]);
-
-    //Se calcula el objetivo de produccion en base al cicleTime
-    const objetivoProduccionHora = Math.round(3600 / cicleTime);
-    const objetivoProduccion = objetivoProduccionHora * 8;
-    //LOG
-    console.log(objetivoProduccion, objetivoProduccionHora);
-
-    //En base a la informacion obtenida se inserta el objetivo de produccion y objetivo por hora
-    const queryPlan = `UPDATE objetivo set objetivoProduccion = ?, objetivoProduccionHora = ? where idTurno = ?;`;
-    const plan = await connection.query(queryPlan, [
-      objetivoProduccion,
-      objetivoProduccionHora,
-      turno,
-    ]);
-
-    //Si no hay error se ejecuta la transaccion y se envia una respuesta correcta
-    await connection.commit();
-    return res.send({
-      message: "Actualizado correctamente",
-    });
+    if (responseEstaciones[0].length == 0) {
+      const queryCrearEstatus = `INSERT INTO estatuspr(tiempoLunch, break, paro, pqTime, idLineaProduccion) VALUES (?,?,?,?,?)`;
+      const responseCrearEstatus = await pool.query(queryCrearEstatus, [
+        lunch,
+        descanso,
+        paro,
+        pqTime,
+        idLinea,
+      ]);
+      return res.status(200).send({
+        message: "Actualizado correctamente",
+      });
+    } else {
+      const updateEstacion = `UPDATE estatuspr set tiempoLunch = ?, break = ?, paro = ?, pqTime = ? where idLineaProduccion = ?`;
+      const responseUpdateEstacion = await pool.query(updateEstacion, [
+        lunch,
+        descanso,
+        paro,
+        pqTime,
+        idLinea,
+      ]);
+      return res.status(200).send({
+        message: "Actualizado correctamente",
+      });
+    }
   } catch (e) {
     console.log(e);
 
-    await connection.rollback();
+    return res.status(500).send({
+      message: "Hubo un error",
+    });
+  }
+};
+
+//Obtiene los tiempos de production ratio de una linea de produccion
+const obtenerProductionRatioPorLinea = async (req, res) => {
+  const { idLinea } = req.params;
+  try {
+    const query = `SELECT * FROM estatuspr WHERE idLineaProduccion = ? LIMIT 1`;
+    const response = await pool.query(query, [idLinea]);
+    return res.status(200).send({
+      productionRatio: response[0][0] || null,
+    });
+  } catch (e) {
+    console.log(e);
     return res.status(500).send({
       message: "Hubo un error",
     });
@@ -534,4 +545,5 @@ module.exports = {
   obtenerTiemposPorLinea,
   obtenerTiemposPorEstacion,
   crearLinea2,
+  obtenerProductionRatioPorLinea,
 };

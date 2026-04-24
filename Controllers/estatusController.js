@@ -45,8 +45,9 @@ const crearEstatus = async (req, res) => {
       }
 
       //Inserta los estatus (colores)
-      const insertEstatusQuery = `INSERT INTO estatus(nombre,prioridad,color,colorId, cancion) values ('prueba',?,?,?,?)`;
+      const insertEstatusQuery = `INSERT INTO estatus(nombre,prioridad,color,colorId, cancion) values (?,?,?,?,?)`;
       const insertEstatus = await connection.query(insertEstatusQuery, [
+        e.nombre,
         e.peso,
         e.color,
         e.colorId,
@@ -282,16 +283,13 @@ const obtenerEstatusProductionRatio = async (req, res) => {
 //Activa uno de los estatus de production ratio
 const activarEstatus = async (req, res) => {
   //Obtiene el colorId del body
-  const { colorId } = req.body;
+  const { idLinea } = req.params;
+  const { estatus } = req.body;
   try {
-    //Desactiva si hay algun otro estatus activo
-    const desactivarEstatusQuery = `UPDATE estatus set activo = false where colorId != ?`;
-    const desactivarEstatus = await pool.query(desactivarEstatusQuery, [
-      colorId,
-    ]);
-    //Activa el nuevo estatus
-    const activarEstatusQuery = `UPDATE estatus set activo = true where colorId = ?`;
-    const activarEstatus = await pool.query(activarEstatusQuery, [colorId]);
+    //Actualiza el estatus en estatuspro
+    const queryEstatus =
+      "UPDATE estatuspr SET activo = ? WHERE idLineaProduccion = ?";
+    const status = await pool.query(queryEstatus, [estatus, idLinea]);
 
     //Envia una respuesta exitosa
     return res.status(200).send({
@@ -307,13 +305,15 @@ const activarEstatus = async (req, res) => {
 
 //Obtener el estatus activo de production ratio
 const obtenerEstatusRatio = async (req, res) => {
+  const { idLinea } = req.params;
   try {
     //Obtiene el estatus que esta en true
-    const estatusRatioQuery = "select * from estatus where activo = true";
-    const estatusRatio = await pool.query(estatusRatioQuery);
+    const estatusRatioQuery =
+      "select * from estatuspr where idLineaProduccion = ?";
+    const estatusRatio = await pool.query(estatusRatioQuery, idLinea);
 
     //Si no hay ningun en true devuelve que no hay ninguno activo
-    if (!estatusRatio) {
+    if (estatusRatio[0].length <= 0) {
       return res.status(404).send({
         message: "No hay estatus activos",
       });

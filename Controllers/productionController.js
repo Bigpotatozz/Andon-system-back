@@ -4,15 +4,18 @@ const { pool } = require("../Config/connection");
 const obtenerProductionRatio = async (req, res) => {
   //Se accede al turno indicado en el body
   const { idTurno } = req.params;
+  const { linea } = req.query;
   try {
     //Accede a la informacion y hace los joins de la linea con su respectivo turno
     const productionRatioQuery = `SELECT * FROM lineaproduccion 
                                 JOIN turno on turno.idLineaProduccion = lineaproduccion.idLineaProduccion
                                 JOIN objetivo on objetivo.idTurno = turno.idTurno
-                                WHERE turno.idTurno = ?
-                                LIMIT 1                                
+                                WHERE turno.idTurno = ? AND turno.idLineaProduccion = ?
                                 `;
-    const productionRatio = await pool.query(productionRatioQuery, [idTurno]);
+    const productionRatio = await pool.query(productionRatioQuery, [
+      idTurno,
+      linea,
+    ]);
 
     //Si no hay nada del resultado envia el error
     if (!productionRatio) {
@@ -171,6 +174,7 @@ const actualizarProgresoProduccion = async (req, res) => {
 //Obtiene el turno en base a la hora
 const obtenerTurno = async (req, res) => {
   try {
+    const { turno } = req.params;
     //Query para obtener el turno
     const queryEnviarTurno = `SELECT * 
                                 FROM turno
@@ -179,9 +183,9 @@ const obtenerTurno = async (req, res) => {
                                   OR
                                   (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
                                 )
-                                LIMIT 1
+                                AND turno.idLineaProduccion = ?
                               `;
-    const response = await pool.query(queryEnviarTurno);
+    const response = await pool.query(queryEnviarTurno, turno);
 
     console.log(response);
 

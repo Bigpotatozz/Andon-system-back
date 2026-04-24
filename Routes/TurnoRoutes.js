@@ -22,7 +22,7 @@ turnoRouter.post(
   actualizarProgresoProduccionMultiLinea,
 );
 //Obtiene un turno en especifico
-turnoRouter.get("/obtenerTurno", obtenerTurno);
+turnoRouter.get("/obtenerTurno/:turno", obtenerTurno);
 //Resetea el progreso de produccion
 turnoRouter.put(
   "/resetearProgresoProduccionHora/:turno",
