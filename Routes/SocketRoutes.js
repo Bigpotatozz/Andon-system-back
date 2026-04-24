@@ -20,8 +20,8 @@ const socketRoutes = async (io) => {
     });
 
     //socket que obtiene los turnos
-    socket.on("obtenerTurno", () => {
-      socketObtenerTurno(socket);
+    socket.on("obtenerTurno", (idLineaProduccion) => {
+      socketObtenerTurno(socket, idLineaProduccion);
     });
 
     //socket que obtiene las estaciones

@@ -17,6 +17,8 @@ const obtenerProductionRatio = async (req, res) => {
       linea,
     ]);
 
+    console.log(productionRatio[0]);
+
     //Si no hay nada del resultado envia el error
     if (!productionRatio) {
       return res.status(404).send({
@@ -241,9 +243,13 @@ const obtenerTurnos = async (req, res) => {
 };
 
 //Socket para obtener los turnos en caso de cambio (en base a la hora)
-const socketObtenerTurno = async (socket) => {
-  //Query que obtiene el turno en base a la hora actual
+const socketObtenerTurno = async (socket, idLineaProduccion) => {
+  //Limpia el intervalo anterior si existe (evita duplicados al re-emitir el evento)
+  if (socket._turnoInterval) {
+    clearInterval(socket._turnoInterval);
+  }
 
+  //Query que obtiene el turno en base a la hora actual
   let turnoActual = 0;
   const socketQuery = `SELECT * 
                         FROM turno
@@ -253,13 +259,13 @@ const socketObtenerTurno = async (socket) => {
                           OR
                           (horaInicio > horaFin AND (CURTIME() >= horaInicio OR CURTIME() < horaFin))
                                 )
-                        LIMIT 1
+                        AND turno.idLineaProduccion = ?
                               `;
 
-  const estatusInterval = setInterval(async () => {
+  socket._turnoInterval = setInterval(async () => {
     try {
       //Ejecuta la query
-      const response = await pool.query(socketQuery);
+      const response = await pool.query(socketQuery, [idLineaProduccion]);
       //Emite el cambio al cliente
       socket.emit("obtenerTurno", response[0]);
     } catch (e) {
@@ -268,7 +274,7 @@ const socketObtenerTurno = async (socket) => {
   }, 1000);
 
   socket.on("disconnect", () => {
-    clearInterval(estatusInterval);
+    clearInterval(socket._turnoInterval);
     console.log("Intervalo terminado");
   });
 };
